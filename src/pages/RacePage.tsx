@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import '../styles/RacePage.css';
+import ResultModal from '../components/ResultModal';
 
-interface RankingItem {
+export interface RankingItem {
   name: string;
   time: number;
 }
@@ -28,6 +29,8 @@ export default function RacePage() {
   const lapRef = useRef<number[]>([...lapList]);
   const finishedRef = useRef<boolean[]>([...finishedList]);
   const rankingRef = useRef<RankingItem[]>([]);
+
+  // const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
     if (!storedPlayers) navigate('/');
@@ -71,6 +74,7 @@ export default function RacePage() {
         if (newFinished.every(Boolean)) {
           clearInterval(interval);
           setRacing(false);
+          // setShowResult(true);
         }
 
         return newAngles;
@@ -175,6 +179,9 @@ export default function RacePage() {
           );
         })}
       </div>
+      {/* {showResult && (
+        <ResultModal ranking={ranking} onClose={() => setShowResult(false)} />
+      )} */}
     </div>
   );
 }

@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true
+    // 기타 다른 옵션들
+  }
+}
