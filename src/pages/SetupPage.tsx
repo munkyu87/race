@@ -1,36 +1,48 @@
-// src/pages/SetupPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../styles/SetupPage.css';
 
-import horse from '../assets/characters/horse.png';
-import panda from '../assets/characters/panda.png';
 import cat from '../assets/characters/cat.png';
 import dog from '../assets/characters/dog.png';
-import pig from '../assets/characters/pig.png';
 import fox from '../assets/characters/fox.png';
+import horse from '../assets/characters/horse.png';
+import panda from '../assets/characters/panda.png';
+import pig from '../assets/characters/pig.png';
 
-const characterImages = [horse, panda, cat, dog, pig, fox];
+const characterList = [
+  { image: cat, defaultName: '고양이' },
+  { image: dog, defaultName: '강아지' },
+  { image: fox, defaultName: '여우' },
+  { image: horse, defaultName: '말' },
+  { image: panda, defaultName: '팬더' },
+  { image: pig, defaultName: '돼지' },
+];
 
 export default function SetupPage() {
-  const [nameInput, setNameInput] = useState('');
-  const [lapCount, setLapCount] = useState(3);
+  const [names, setNames] = useState<string[]>(
+    Array(characterList.length).fill('')
+  );
+  const [lapCount, setLapCount] = useState<number>(3);
   const navigate = useNavigate();
 
-  const handleStart = () => {
-    const names = nameInput
-      .split(/[,\\n]/)
-      .map((n) => n.trim())
-      .filter((n) => n.length > 0);
+  const handleNameChange = (idx: number, value: string) => {
+    const updated = [...names];
+    updated[idx] = value;
+    setNames(updated);
+  };
 
-    if (names.length < 2) {
+  const handleStart = () => {
+    const players = characterList
+      .map((char, idx) => ({
+        name: names[idx].trim(),
+        image: char.image,
+      }))
+      .filter((p) => p.name !== '');
+
+    if (players.length < 2) {
       alert('참가자는 최소 2명 이상이어야 합니다.');
       return;
     }
-
-    const players = names.map((name, idx) => ({
-      name,
-      image: characterImages[idx % characterImages.length],
-    }));
 
     localStorage.setItem('players', JSON.stringify(players));
     localStorage.setItem('laps', lapCount.toString());
@@ -38,16 +50,25 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="setup-screen">
-      <h1>🏁 이름 경주 세팅 🏁</h1>
-      <textarea
-        rows={6}
-        placeholder="참가자 이름을 쉼표 또는 줄바꿈으로 입력하세요"
-        value={nameInput}
-        onChange={(e) => setNameInput(e.target.value)}
-      />
-      <div className="lap-input">
-        바퀴 수:{' '}
+    <div className="setup-container">
+      <h1>🏁 동물 쇼트트랙 🏁</h1>
+      <div className="character-grid">
+        {characterList.map((char, idx) => (
+          <div key={idx} className="character-card">
+            <div className="character-slot" key={idx}>
+              <img src={char.image} alt={char.defaultName} />
+              <input
+                type="text"
+                placeholder={char.defaultName}
+                value={names[idx]}
+                onChange={(e) => handleNameChange(idx, e.target.value)}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="lap-setting">
+        바퀴 수:
         <input
           type="number"
           value={lapCount}
@@ -56,7 +77,7 @@ export default function SetupPage() {
           onChange={(e) => setLapCount(Number(e.target.value))}
         />
       </div>
-      <button onClick={handleStart} className="start-button">
+      <button className="start-button" onClick={handleStart}>
         레이스 시작!
       </button>
     </div>

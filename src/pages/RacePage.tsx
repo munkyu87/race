@@ -3,6 +3,11 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import '../styles/RacePage.css';
 
+interface RankingItem {
+  name: string;
+  time: number;
+}
+
 export default function RacePage() {
   const navigate = useNavigate();
 
@@ -13,24 +18,19 @@ export default function RacePage() {
   const totalLaps = storedLaps ? parseInt(storedLaps) : 3;
 
   const [angleList, setAngleList] = useState<number[]>(characters.map(() => 0));
-  const [prevAngleList, setPrevAngleList] = useState<number[]>(
-    characters.map(() => 0)
-  );
   const [lapList, setLapList] = useState<number[]>(characters.map(() => 0));
   const [finishedList, setFinishedList] = useState<boolean[]>(
     characters.map(() => false)
   );
-  const [ranking, setRanking] = useState<string[]>([]);
+  const [ranking, setRanking] = useState<RankingItem[]>([]);
   const [racing, setRacing] = useState(false);
 
   const lapRef = useRef<number[]>([...lapList]);
   const finishedRef = useRef<boolean[]>([...finishedList]);
-  const rankingRef = useRef<string[]>([]);
+  const rankingRef = useRef<RankingItem[]>([]);
 
   useEffect(() => {
-    if (!storedPlayers) {
-      navigate('/');
-    }
+    if (!storedPlayers) navigate('/');
   }, []);
 
   const startRace = () => {
@@ -39,8 +39,9 @@ export default function RacePage() {
     const interval = setInterval(() => {
       setAngleList((prevAngles) => {
         const newAngles = [...prevAngles];
-        const newFinished = [...finishedList];
-        const newRanking = [...ranking];
+        const newFinished = [...finishedRef.current];
+        const newRanking = [...rankingRef.current];
+        const newLaps = [...lapRef.current];
 
         newAngles.forEach((angle, i) => {
           if (newFinished[i]) return;
@@ -49,23 +50,24 @@ export default function RacePage() {
           const nextAngle = angle + speed;
           newAngles[i] = nextAngle;
 
-          // ✅ 정확한 바퀴 수 계산
           const lap = Math.floor(nextAngle / 360);
+          lapRef.current[i] = lap;
 
-          // 도착 판정
           const isFinish = lap >= totalLaps;
+
           if (isFinish && !newFinished[i]) {
             newFinished[i] = true;
-            newRanking.push(characters[i].name);
+            newRanking.push({ name: characters[i].name, time: Date.now() });
           }
-
-          // lapList 업데이트도 동기화
-          lapRef.current[i] = lap;
         });
 
-        setFinishedList(newFinished);
-        setRanking([...newRanking]);
-        setLapList([...lapRef.current]); // 화면 반영
+        finishedRef.current = newFinished;
+        rankingRef.current = newRanking;
+
+        setFinishedList([...newFinished]);
+        setLapList([...lapRef.current]);
+        setRanking([...newRanking].sort((a, b) => a.time - b.time));
+
         if (newFinished.every(Boolean)) {
           clearInterval(interval);
           setRacing(false);
@@ -75,16 +77,19 @@ export default function RacePage() {
       });
     }, 100);
   };
-
   const getXY = (angle: number, index: number) => {
-    const a = 400 + index * 25;
-    const b = 180 + index * 25;
+    const a = 380;
+    const b = 180;
     const centerX = 570;
     const centerY = 300;
+
     const rad = (angle * Math.PI) / 180;
+
+    const xOffset = (index - (characters.length - 1) / 2) * 35;
+
     return {
-      x: centerX + a * Math.cos(rad),
-      y: centerY + b * Math.sin(rad),
+      x: centerX + a * Math.cos(rad) + xOffset,
+      y: centerY + b * Math.sin(rad) + 10,
     };
   };
 
@@ -100,6 +105,10 @@ export default function RacePage() {
   return (
     <div className="race-container">
       <h1>🏁 레이스 스타트 🏁</h1>
+      <button className="back-button" onClick={() => navigate('/')}>
+        ← 세팅으로
+      </button>
+
       <h3>🎯 총 바퀴 수: {totalLaps}바퀴</h3>
       <ul
         style={{
@@ -155,13 +164,13 @@ export default function RacePage() {
 
       <div className="ranking-board">
         <div>🏆 순위</div>
-        {ranking.map((name, idx) => {
-          const char = characters.find((c: any) => c.name === name);
+        {ranking.map((r, idx) => {
+          const char = characters.find((c: any) => c.name === r.name);
           return (
-            <div key={name} className="ranking-item">
+            <div key={r.name} className="ranking-item">
               <span>{idx + 1}등</span>
-              {char && <img src={char.image} alt={name} />}
-              <span>{name}</span>
+              {char && <img src={char.image} alt={r.name} />}
+              <span>{r.name}</span>
             </div>
           );
         })}
