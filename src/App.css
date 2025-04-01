@@ -1,0 +1,57 @@
+body {
+  background-color: black;
+  color: white;
+  font-family: sans-serif;
+}
+
+.setup-screen {
+  max-width: 600px;
+  margin: 3rem auto;
+  text-align: center;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.lap-input {
+  margin-top: 1rem;
+}
+
+.start-button {
+  background-color: yellow;
+  padding: 0.7rem 1.5rem;
+  border-radius: 1rem;
+  border: none;
+  font-weight: bold;
+  margin-top: 1rem;
+  cursor: pointer;
+}
+
+.container {
+  text-align: center;
+  padding: 2rem;
+}
+
+.track {
+  margin: 2rem auto;
+  width: 90%;
+  height: 300px;
+  border-left: 5px solid white;
+  border-right: 5px solid red;
+  position: relative;
+  overflow: hidden;
+}
+
+.racer {
+  position: relative;
+  margin-bottom: 1.2rem;
+}
+
+.character-img {
+  width: 60px;
+  height: 60px;
+}
