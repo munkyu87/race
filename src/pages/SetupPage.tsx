@@ -10,12 +10,12 @@ import panda from '../assets/characters/panda.png';
 import pig from '../assets/characters/pig.png';
 
 const characterList = [
-  { image: cat, defaultName: '고양이' },
-  { image: dog, defaultName: '강아지' },
-  { image: fox, defaultName: '여우' },
-  { image: horse, defaultName: '말' },
-  { image: panda, defaultName: '팬더' },
-  { image: pig, defaultName: '돼지' },
+  { id: 'cat', image: cat, defaultName: '고양이' },
+  { id: 'dog', image: dog, defaultName: '강아지' },
+  { id: 'fox', image: fox, defaultName: '여우' },
+  { id: 'horse', image: horse, defaultName: '말' },
+  { id: 'panda', image: panda, defaultName: '팬더' },
+  { id: 'pig', image: pig, defaultName: '돼지' },
 ];
 
 export default function SetupPage() {
@@ -34,6 +34,7 @@ export default function SetupPage() {
   const handleStart = () => {
     const players = characterList
       .map((char, idx) => ({
+        id: char.id,
         name: names[idx].trim(),
         image: char.image,
       }))

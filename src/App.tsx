@@ -7,7 +7,6 @@ import {
 } from 'react-router-dom';
 import SetupPage from './pages/SetupPage';
 import RacePage from './pages/RacePage';
-import ResultPage from './pages/ResultPage';
 
 function App() {
   return (
@@ -15,7 +14,6 @@ function App() {
       <Routes>
         <Route path="/race" element={<SetupPage />} />
         <Route path="/race-play" element={<RacePage />} />
-        <Route path="/result" element={<ResultPage />} />
         <Route path="*" element={<Navigate to="/race" />} />
       </Routes>
     </Router>

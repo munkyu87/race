@@ -197,3 +197,20 @@ button {
   border: none;
   cursor: pointer;
 }
+
+.character-img.effect {
+  box-shadow: 0 0 15px 5px gold;
+  animation: glow 2s ease-in-out 1;
+  /* animation: glow 1s ease-in-out infinite alternate; */
+}
+
+@keyframes glow {
+  from {
+    transform: scale(1);
+    box-shadow: 0 0 10px 2px gold;
+  }
+  to {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px 6px gold;
+  }
+}
