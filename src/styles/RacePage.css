@@ -197,20 +197,32 @@ button {
   border: none;
   cursor: pointer;
 }
-
-.character-img.effect {
-  box-shadow: 0 0 15px 5px gold;
-  animation: glow 2s ease-in-out 1;
-  /* animation: glow 1s ease-in-out infinite alternate; */
+/* 고양이 스킬 효과 */
+.effect-cat {
+  box-shadow: 0 0 15px 6px gold;
+  animation: glow-cat 1s ease-in-out infinite alternate;
 }
 
-@keyframes glow {
+@keyframes glow-cat {
   from {
-    transform: scale(1);
-    box-shadow: 0 0 10px 2px gold;
+    box-shadow: 0 0 5px gold;
   }
   to {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px 6px gold;
+    box-shadow: 0 0 15px 6px gold;
+  }
+}
+
+/* 말 스킬 효과 */
+.effect-horse {
+  box-shadow: 0 0 15px 6px dodgerblue;
+  animation: glow-horse 1s ease-in-out infinite alternate;
+}
+
+@keyframes glow-horse {
+  from {
+    box-shadow: 0 0 5px dodgerblue;
+  }
+  to {
+    box-shadow: 0 0 15px 6px dodgerblue;
   }
 }
