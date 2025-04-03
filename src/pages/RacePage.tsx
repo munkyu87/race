@@ -1,19 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import '../styles/RacePage.css';
-
-export interface Character {
-  id: string;
-  name: string;
-  image: string;
-}
-
-export interface RankingItem {
-  id: string;
-  name: string;
-  time: number;
-}
+import { Character, RankingItem } from '../types';
+import {
+  useCatSkill,
+  useHorseSkill,
+  usePigSkill,
+} from '../skills/skillManager';
 
 export default function RacePage() {
   const navigate = useNavigate();
@@ -44,40 +38,26 @@ export default function RacePage() {
   const finishedRef = useRef([...finishedList]);
   const rankingRef = useRef<RankingItem[]>([]);
   const angleRef = useRef([...angleList]);
-  const horseSpeedBonusRef = useRef<number[]>(characters.map(() => 0));
-  const horseLastBoostTimeRef = useRef<number>(Date.now());
-
-  const catLastSkillTimeRef = useRef<number | null>(null);
-  const catCooltime = 5000;
-
-  const pigLastSkillTimeRef = useRef<number | null>(null);
-  const pigCooltime = 7000;
-  const pausedRef = useRef<boolean[]>(characters.map(() => false));
-
-  const startTimeRef = useRef<number>(0);
-  const charactersRef = useRef(characters);
-
-  useEffect(() => {
-    charactersRef.current = characters;
-  }, [characters]);
+  const pausedRef = useRef<boolean[]>([...pausedList]);
+  const bonusRef = useRef<number[]>(characters.map(() => 0));
+  const lastBoostRef = useRef<number>(Date.now());
+  const catSkillTimeRef = useRef<number | null>(null);
+  const pigSkillTimeRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
     if (!storedPlayers) navigate('/');
   }, []);
 
-  // 말 이펙트
   useEffect(() => {
     if (triggerHorseEffect) {
-      const horseIndex = charactersRef.current.findIndex(
-        (c) => c.id === 'horse'
-      );
+      const horseIndex = characters.findIndex((c) => c.id === 'horse');
       if (horseIndex !== -1) {
         setEffectList((prev) => {
           const updated = [...prev];
           updated[horseIndex] = 'horse';
           return updated;
         });
-
         setTimeout(() => {
           setEffectList((prev) => {
             const updated = [...prev];
@@ -92,8 +72,7 @@ export default function RacePage() {
 
   const startRace = () => {
     setRacing(true);
-    const startTime = Date.now();
-    startTimeRef.current = startTime;
+    startTimeRef.current = Date.now();
 
     const interval = setInterval(() => {
       setAngleList((prevAngles) => {
@@ -103,121 +82,76 @@ export default function RacePage() {
         const newLaps = [...lapRef.current];
         const now = Date.now();
 
-        // 🐴 말 스킬
-        const horseIndex = characters.findIndex((c) => c.id === 'horse');
-        if (horseIndex !== -1 && now - horseLastBoostTimeRef.current >= 8000) {
-          horseSpeedBonusRef.current[horseIndex] += 0.2;
-          setTriggerHorseEffect(true);
-          horseLastBoostTimeRef.current = now;
-        }
-
-        // 🐷 돼지 스킬
-        const pigIndex = characters.findIndex((c) => c.id === 'pig');
-        const pigLastUsed = pigLastSkillTimeRef.current;
-        const elapsed = now - startTimeRef.current;
-        const canUsePig =
-          elapsed >= pigCooltime &&
-          (!pigLastUsed || now - pigLastUsed >= pigCooltime);
-
-        if (pigIndex !== -1 && canUsePig) {
-          const newPaused = characters.map((_, i) => i !== pigIndex);
-          pausedRef.current = newPaused;
-          setPausedList(newPaused);
-
-          setTimeout(() => {
-            pausedRef.current = characters.map(() => false);
-            setPausedList(pausedRef.current);
-          }, 1000);
-
-          setEffectList((prev) => {
-            const updated = [...prev];
-            updated[pigIndex] = 'pig';
-            return updated;
-          });
-
-          setTimeout(() => {
+        useHorseSkill(characters, bonusRef, lastBoostRef, () =>
+          setTriggerHorseEffect(true)
+        );
+        usePigSkill(
+          characters,
+          pausedRef,
+          setPausedList,
+          (index, type) => {
             setEffectList((prev) => {
               const updated = [...prev];
-              updated[pigIndex] = '';
+              updated[index] = type;
               return updated;
             });
-          }, 2000);
-
-          pigLastSkillTimeRef.current = now;
-        }
+            setTimeout(() => {
+              setEffectList((prev) => {
+                const updated = [...prev];
+                updated[index] = '';
+                return updated;
+              });
+            }, 2000);
+          },
+          pigSkillTimeRef,
+          startTimeRef
+        );
 
         newAngles.forEach((angle, i) => {
           if (newFinished[i] || pausedRef.current[i]) return;
-
-          const bonus = horseSpeedBonusRef.current[i] || 0;
+          const bonus = bonusRef.current?.[i] || 0;
           const speed = Math.random() * 4 + 1 + bonus;
-          const nextAngle = angle + speed;
-          newAngles[i] = nextAngle;
-
-          const lap = Math.floor(nextAngle / 360);
-          lapRef.current[i] = lap;
-
-          if (lap >= totalLaps && !newFinished[i]) {
+          newAngles[i] += speed;
+          newLaps[i] = Math.floor(newAngles[i] / 360);
+          if (newLaps[i] >= totalLaps && !newFinished[i]) {
             newFinished[i] = true;
             newRanking.push({
               id: characters[i].id,
               name: characters[i].name,
-              time: now - startTime,
+              time: now - startTimeRef.current,
             });
           }
         });
 
-        // 🐱 고양이 스킬
-        const catIndex = characters.findIndex((c) => c.id === 'cat');
-        const catLastUsed = catLastSkillTimeRef.current;
-        const canUseCat =
-          elapsed >= catCooltime &&
-          (!catLastUsed || now - catLastUsed >= catCooltime);
-
-        if (catIndex !== -1 && lapRef.current[catIndex] >= 1 && canUseCat) {
-          const sorted = characters
-            .map((_, i) => ({
-              index: i,
-              lap: lapRef.current[i],
-              angle: newAngles[i],
-            }))
-            .sort((a, b) => b.lap - a.lap || b.angle - a.angle);
-
-          const catRank = sorted.findIndex((e) => e.index === catIndex);
-          const target = sorted[catRank - 1];
-
-          if (
-            target &&
-            Math.abs(newAngles[catIndex] - newAngles[target.index]) > 20
-          ) {
-            const temp = newAngles[catIndex];
-            newAngles[catIndex] = newAngles[target.index];
-            newAngles[target.index] = temp;
-
+        useCatSkill(
+          characters,
+          newAngles,
+          lapRef,
+          (index, type) => {
             setEffectList((prev) => {
               const updated = [...prev];
-              updated[catIndex] = 'cat';
+              updated[index] = type;
               return updated;
             });
-
             setTimeout(() => {
               setEffectList((prev) => {
                 const updated = [...prev];
-                updated[catIndex] = '';
+                updated[index] = '';
                 return updated;
               });
             }, 2000);
-
-            catLastSkillTimeRef.current = now;
-          }
-        }
+          },
+          catSkillTimeRef,
+          startTimeRef
+        );
 
         finishedRef.current = newFinished;
         rankingRef.current = newRanking;
         angleRef.current = newAngles;
+        lapRef.current = newLaps;
 
         setFinishedList([...newFinished]);
-        setLapList([...lapRef.current]);
+        setLapList([...newLaps]);
         setRanking([...newRanking].sort((a, b) => a.time - b.time));
 
         if (newFinished.every(Boolean)) {
@@ -231,10 +165,10 @@ export default function RacePage() {
   };
 
   const getXY = (angle: number, index: number) => {
-    const a = 380;
-    const b = 180;
-    const centerX = 570;
-    const centerY = 300;
+    const a = 380,
+      b = 180,
+      centerX = 570,
+      centerY = 300;
     const rad = (angle * Math.PI) / 180;
     const xOffset = (index - (characters.length - 1) / 2) * 35;
     return {
@@ -266,17 +200,19 @@ export default function RacePage() {
           justifyContent: 'center',
           gap: '1rem',
           listStyle: 'none',
+          padding: 0,
+          flexWrap: 'wrap',
         }}
       >
         {characters.map((char, i) => (
-          <li key={char.id}>
-            <img
-              src={char.image}
-              alt={char.name}
-              width={30}
-              style={{ verticalAlign: 'middle' }}
-            />
-            {char.name} - {lapList[i]}바퀴
+          <li
+            key={char.id}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <img src={char.image} alt={char.name} width={30} />
+            <span>
+              {i + 1} - {lapList[i]}바퀴
+            </span>
           </li>
         ))}
       </ul>
@@ -316,11 +252,12 @@ export default function RacePage() {
         <div>🏆 순위</div>
         {ranking.map((r, idx) => {
           const char = characters.find((c) => c.id === r.id);
+          if (!char) return null;
           return (
             <div key={r.id} className="ranking-item">
               <span>{idx + 1}등</span>
-              {char && <img src={char.image} alt={r.name} />}
-              <span>{r.name}</span>
+              <img src={char.image} alt={char.name} />
+              <span>{char.name}</span>
             </div>
           );
         })}
