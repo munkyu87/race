@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  Slider,
+  Typography,
+} from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
 import '../styles/SetupPage.css';
+import { observer } from 'mobx-react-lite';
 
 import cat from '../assets/characters/cat.png';
 import dog from '../assets/characters/dog.png';
@@ -8,6 +18,7 @@ import fox from '../assets/characters/fox.png';
 import horse from '../assets/characters/horse.png';
 import panda from '../assets/characters/panda.png';
 import pig from '../assets/characters/pig.png';
+import { settingsStore } from '../stores/settingsStore';
 
 const characterList = [
   { id: 'cat', image: cat, defaultName: '고양이' },
@@ -18,11 +29,12 @@ const characterList = [
   { id: 'pig', image: pig, defaultName: '돼지' },
 ];
 
-export default function SetupPage() {
+function SetupPage() {
   const [names, setNames] = useState<string[]>(
     Array(characterList.length).fill('')
   );
   const [lapCount, setLapCount] = useState<number>(3);
+  const [openSettings, setOpenSettings] = useState(false);
   const navigate = useNavigate();
 
   const handleNameChange = (idx: number, value: string) => {
@@ -53,6 +65,68 @@ export default function SetupPage() {
   return (
     <div className="setup-container">
       <h1>🏁 동물 쇼트트랙 🏁</h1>
+
+      <IconButton
+        style={{ position: 'absolute', color: 'white', top: 16, right: 16 }}
+        onClick={() => setOpenSettings(true)}
+      >
+        <SettingsIcon fontSize="large" />
+      </IconButton>
+
+      <Dialog open={openSettings} onClose={() => setOpenSettings(false)}>
+        <DialogTitle>스킬 쿨타임 설정</DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            🐴 말: {settingsStore.settings.horseSkillCooltime / 1000}s
+          </Typography>
+          <Slider
+            value={settingsStore.settings.horseSkillCooltime / 1000}
+            onChange={(e, val) =>
+              settingsStore.updateSetting(
+                'horseSkillCooltime',
+                (val as number) * 1000
+              )
+            }
+            min={3}
+            max={20}
+            step={1}
+            valueLabelDisplay="auto"
+          />
+
+          <Typography gutterBottom>
+            🐱 고양이: {settingsStore.settings.catSkillCooltime / 1000}s
+          </Typography>
+          <Slider
+            value={settingsStore.settings.catSkillCooltime / 1000}
+            onChange={(e, val) =>
+              settingsStore.updateSetting(
+                'catSkillCooltime',
+                (val as number) * 1000
+              )
+            }
+            min={3}
+            max={20}
+            valueLabelDisplay="auto"
+          />
+
+          <Typography gutterBottom>
+            🐷 돼지: {settingsStore.settings.pigSkillCooltime / 1000}s
+          </Typography>
+          <Slider
+            value={settingsStore.settings.pigSkillCooltime / 1000}
+            onChange={(e, val) =>
+              settingsStore.updateSetting(
+                'pigSkillCooltime',
+                (val as number) * 1000
+              )
+            }
+            min={3}
+            max={20}
+            valueLabelDisplay="auto"
+          />
+        </DialogContent>
+      </Dialog>
+
       <div className="character-grid">
         {characterList.map((char, idx) => (
           <div key={idx} className="character-card">
@@ -84,3 +158,5 @@ export default function SetupPage() {
     </div>
   );
 }
+
+export default observer(SetupPage);

@@ -13,7 +13,7 @@ export interface RankingItem {
 export type EffectType = '' | 'cat' | 'horse' | 'pig';
 
 export interface GameSettings {
-  horseSkillInterval: number; // 예: 8000 (ms)
+  horseSkillCooltime: number; // 예: 8000 (ms)
   catSkillCooltime: number; // 예: 5000 (ms)
   pigSkillCooltime: number; // 예: 7000 (ms)
   pigPauseDuration: number; // 예: 1000 (ms)

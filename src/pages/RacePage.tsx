@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Button, IconButton } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import '../styles/RacePage.css';
 import { Character, RankingItem } from '../types';
 import {
@@ -8,6 +11,7 @@ import {
   useHorseSkill,
   usePigSkill,
 } from '../skills/skillManager';
+import { settingsStore } from '../stores/settingsStore';
 
 export default function RacePage() {
   const navigate = useNavigate();
@@ -44,6 +48,8 @@ export default function RacePage() {
   const catSkillTimeRef = useRef<number | null>(null);
   const pigSkillTimeRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
+
+  const { settings } = settingsStore;
 
   useEffect(() => {
     if (!storedPlayers) navigate('/');
@@ -82,8 +88,12 @@ export default function RacePage() {
         const newLaps = [...lapRef.current];
         const now = Date.now();
 
-        useHorseSkill(characters, bonusRef, lastBoostRef, () =>
-          setTriggerHorseEffect(true)
+        useHorseSkill(
+          characters,
+          bonusRef,
+          lastBoostRef,
+          () => setTriggerHorseEffect(true),
+          settings.horseSkillCooltime
         );
         usePigSkill(
           characters,
@@ -104,7 +114,8 @@ export default function RacePage() {
             }, 2000);
           },
           pigSkillTimeRef,
-          startTimeRef
+          startTimeRef,
+          settings.pigSkillCooltime
         );
 
         newAngles.forEach((angle, i) => {
@@ -142,7 +153,8 @@ export default function RacePage() {
             }, 2000);
           },
           catSkillTimeRef,
-          startTimeRef
+          startTimeRef,
+          settings.catSkillCooltime
         );
 
         finishedRef.current = newFinished;
@@ -188,34 +200,58 @@ export default function RacePage() {
 
   return (
     <div className="race-container">
-      <h1>🏁 레이스 스타트 🏁</h1>
-      <button className="back-button" onClick={() => navigate('/')}>
-        ← 세팅으로
-      </button>
-      <h3>🎯 총 바퀴 수: {totalLaps}바퀴</h3>
-
-      <ul
+      <div
+        className="race-header"
         style={{
           display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
-          gap: '1rem',
-          listStyle: 'none',
-          padding: 0,
-          flexWrap: 'wrap',
+          position: 'relative',
         }}
       >
-        {characters.map((char, i) => (
-          <li
-            key={char.id}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-          >
-            <img src={char.image} alt={char.name} width={30} />
-            <span>
-              {i + 1} - {lapList[i]}바퀴
-            </span>
-          </li>
-        ))}
-      </ul>
+        <Button
+          variant="contained"
+          color="info"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/')}
+          sx={{
+            position: 'absolute',
+            left: 16,
+            top: 16,
+            fontSize: '1rem',
+            padding: '8px 16px',
+          }}
+        >
+          세팅으로
+        </Button>
+        <h1 style={{ margin: '1rem 0' }}>🏁 레이스 스타트 🏁</h1>
+      </div>
+
+      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+        <ul
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '1rem',
+            listStyle: 'none',
+            padding: 0,
+            flexWrap: 'wrap',
+          }}
+        >
+          <h3>🎯 총 바퀴 수: {totalLaps}바퀴</h3>
+          {characters.map((char, i) => (
+            <li
+              key={char.id}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <img src={char.image} alt={char.name} width={30} />
+              <span>
+                {i + 1} - {lapList[i]}바퀴
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div className="oval-track-wrapper">
         <div className="track-markers">
@@ -242,10 +278,19 @@ export default function RacePage() {
         </div>
       </div>
 
-      <div className="controls">
-        <button onClick={startRace} disabled={racing}>
+      <div
+        className="controls"
+        style={{ textAlign: 'center', marginTop: '1.5rem' }}
+      >
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<PlayArrowIcon />}
+          onClick={startRace}
+          disabled={racing}
+        >
           {racing ? '레이싱 중...' : '레이싱 시작!'}
-        </button>
+        </Button>
       </div>
 
       <div className="ranking-board">

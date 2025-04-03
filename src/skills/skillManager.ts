@@ -8,7 +8,8 @@ export function useCatSkill(
   lapRef: RefObject<number[]>,
   effectSetter: (index: number, type: string) => void,
   skillTimeRef: React.MutableRefObject<number | null>,
-  startTimeRef: RefObject<number>
+  startTimeRef: RefObject<number>,
+  catSkillCooltime: number
 ) {
   const catIndex = characters.findIndex((c) => c.id === 'cat');
   const now = Date.now();
@@ -22,8 +23,8 @@ export function useCatSkill(
   const canUse =
     catIndex !== -1 &&
     lapValid &&
-    elapsed >= 5000 &&
-    (!lastUsed || now - lastUsed >= 5000);
+    elapsed >= catSkillCooltime &&
+    (!lastUsed || now - lastUsed >= catSkillCooltime);
 
   if (canUse) {
     const sorted = characters
@@ -56,7 +57,8 @@ export function useHorseSkill(
   characters: Character[],
   bonusRef: RefObject<number[]>,
   lastBoostRef: MutableRefObject<number>,
-  effectTrigger: () => void
+  effectTrigger: () => void,
+  horseSkillCooltime: number
 ) {
   const horseIndex = characters.findIndex((c) => c.id === 'horse');
   const now = Date.now();
@@ -64,7 +66,7 @@ export function useHorseSkill(
   if (
     horseIndex !== -1 &&
     lastBoostRef.current !== null &&
-    now - lastBoostRef.current >= 8000 &&
+    now - lastBoostRef.current >= horseSkillCooltime &&
     bonusRef.current
   ) {
     bonusRef.current[horseIndex] += 0.2;
@@ -80,7 +82,8 @@ export function usePigSkill(
   setPausedList: (list: boolean[]) => void,
   effectSetter: (index: number, type: string) => void,
   pigSkillTimeRef: MutableRefObject<number | null>,
-  startTimeRef: RefObject<number>
+  startTimeRef: RefObject<number>,
+  pigSkillCooltime: number
 ) {
   const pigIndex = characters.findIndex((c) => c.id === 'pig');
   const now = Date.now();
@@ -89,7 +92,9 @@ export function usePigSkill(
   const lastUsed = pigSkillTimeRef.current;
 
   const canUse =
-    pigIndex !== -1 && elapsed >= 7000 && (!lastUsed || now - lastUsed >= 7000);
+    pigIndex !== -1 &&
+    elapsed >= pigSkillCooltime &&
+    (!lastUsed || now - lastUsed >= pigSkillCooltime);
 
   if (canUse) {
     const paused = characters.map((_, i) => i !== pigIndex);
