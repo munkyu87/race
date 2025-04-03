@@ -226,3 +226,20 @@ button {
     box-shadow: 0 0 15px 6px dodgerblue;
   }
 }
+
+/* 돼지 스킬 효과 */
+.character-img.effect-pig {
+  box-shadow: 0 0 10px 4px pink;
+  animation: pigGlow 1s ease-in-out infinite alternate;
+}
+
+@keyframes pigGlow {
+  from {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  to {
+    transform: scale(1.05);
+    filter: brightness(1.5);
+  }
+}

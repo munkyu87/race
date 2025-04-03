@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import '../styles/RacePage.css';
-import ResultModal from '../components/ResultModal';
 
 export interface Character {
   id: string;
@@ -36,7 +35,9 @@ export default function RacePage() {
   const [effectList, setEffectList] = useState<string[]>(
     characters.map(() => '')
   );
-
+  const [pausedList, setPausedList] = useState<boolean[]>(
+    characters.map(() => false)
+  );
   const [triggerHorseEffect, setTriggerHorseEffect] = useState(false);
 
   const lapRef = useRef([...lapList]);
@@ -47,6 +48,12 @@ export default function RacePage() {
   const horseLastBoostTimeRef = useRef<number>(Date.now());
 
   const catLastSkillTimeRef = useRef<number | null>(null);
+  const catCooltime = 5000;
+
+  const pigLastSkillTimeRef = useRef<number | null>(null);
+  const pigCooltime = 7000;
+  const pausedRef = useRef<boolean[]>(characters.map(() => false));
+
   const startTimeRef = useRef<number>(0);
   const charactersRef = useRef(characters);
 
@@ -58,7 +65,7 @@ export default function RacePage() {
     if (!storedPlayers) navigate('/');
   }, []);
 
-  // 말 이펙트 트리거 감지
+  // 말 이펙트
   useEffect(() => {
     if (triggerHorseEffect) {
       const horseIndex = charactersRef.current.findIndex(
@@ -96,7 +103,7 @@ export default function RacePage() {
         const newLaps = [...lapRef.current];
         const now = Date.now();
 
-        // 말 스킬: 8초마다 속도 증가
+        // 🐴 말 스킬
         const horseIndex = characters.findIndex((c) => c.id === 'horse');
         if (horseIndex !== -1 && now - horseLastBoostTimeRef.current >= 8000) {
           horseSpeedBonusRef.current[horseIndex] += 0.2;
@@ -104,8 +111,43 @@ export default function RacePage() {
           horseLastBoostTimeRef.current = now;
         }
 
+        // 🐷 돼지 스킬
+        const pigIndex = characters.findIndex((c) => c.id === 'pig');
+        const pigLastUsed = pigLastSkillTimeRef.current;
+        const elapsed = now - startTimeRef.current;
+        const canUsePig =
+          elapsed >= pigCooltime &&
+          (!pigLastUsed || now - pigLastUsed >= pigCooltime);
+
+        if (pigIndex !== -1 && canUsePig) {
+          const newPaused = characters.map((_, i) => i !== pigIndex);
+          pausedRef.current = newPaused;
+          setPausedList(newPaused);
+
+          setTimeout(() => {
+            pausedRef.current = characters.map(() => false);
+            setPausedList(pausedRef.current);
+          }, 1000);
+
+          setEffectList((prev) => {
+            const updated = [...prev];
+            updated[pigIndex] = 'pig';
+            return updated;
+          });
+
+          setTimeout(() => {
+            setEffectList((prev) => {
+              const updated = [...prev];
+              updated[pigIndex] = '';
+              return updated;
+            });
+          }, 2000);
+
+          pigLastSkillTimeRef.current = now;
+        }
+
         newAngles.forEach((angle, i) => {
-          if (newFinished[i]) return;
+          if (newFinished[i] || pausedRef.current[i]) return;
 
           const bonus = horseSpeedBonusRef.current[i] || 0;
           const speed = Math.random() * 4 + 1 + bonus;
@@ -126,12 +168,13 @@ export default function RacePage() {
         });
 
         // 🐱 고양이 스킬
-        const myIndex = characters.findIndex((c) => c.id === 'cat');
-        const elapsed = now - startTimeRef.current;
-        const lastUsed = catLastSkillTimeRef.current;
-        const canUse = elapsed >= 5000 && (!lastUsed || now - lastUsed >= 5000);
+        const catIndex = characters.findIndex((c) => c.id === 'cat');
+        const catLastUsed = catLastSkillTimeRef.current;
+        const canUseCat =
+          elapsed >= catCooltime &&
+          (!catLastUsed || now - catLastUsed >= catCooltime);
 
-        if (myIndex !== -1 && lapRef.current[myIndex] >= 1 && canUse) {
+        if (catIndex !== -1 && lapRef.current[catIndex] >= 1 && canUseCat) {
           const sorted = characters
             .map((_, i) => ({
               index: i,
@@ -140,26 +183,27 @@ export default function RacePage() {
             }))
             .sort((a, b) => b.lap - a.lap || b.angle - a.angle);
 
-          const myRank = sorted.findIndex((e) => e.index === myIndex);
-          const target = sorted[myRank - 1];
+          const catRank = sorted.findIndex((e) => e.index === catIndex);
+          const target = sorted[catRank - 1];
 
           if (
             target &&
-            Math.abs(newAngles[myIndex] - newAngles[target.index]) > 20
+            Math.abs(newAngles[catIndex] - newAngles[target.index]) > 20
           ) {
-            const temp = newAngles[myIndex];
-            newAngles[myIndex] = newAngles[target.index];
+            const temp = newAngles[catIndex];
+            newAngles[catIndex] = newAngles[target.index];
             newAngles[target.index] = temp;
 
             setEffectList((prev) => {
               const updated = [...prev];
-              updated[myIndex] = 'cat';
+              updated[catIndex] = 'cat';
               return updated;
             });
+
             setTimeout(() => {
               setEffectList((prev) => {
                 const updated = [...prev];
-                updated[myIndex] = '';
+                updated[catIndex] = '';
                 return updated;
               });
             }, 2000);
@@ -226,7 +270,12 @@ export default function RacePage() {
       >
         {characters.map((char, i) => (
           <li key={char.id}>
-            <img src={char.image} alt={char.name} width={30} />
+            <img
+              src={char.image}
+              alt={char.name}
+              width={30}
+              style={{ verticalAlign: 'middle' }}
+            />
             {char.name} - {lapList[i]}바퀴
           </li>
         ))}
