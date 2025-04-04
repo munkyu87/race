@@ -128,7 +128,6 @@ export default function RacePage() {
           dogSkillStateRef
         );
 
-        // 🐶 강아지 스킬 추가!
         useDogSkill(
           characters,
           bonusRef,
@@ -143,11 +142,6 @@ export default function RacePage() {
                   : type;
               return updated;
             });
-            // setEffectList((prev) => {
-            //   const updated = [...prev];
-            //   updated[index] = type;
-            //   return updated;
-            // });
 
             setTimeout(() => {
               setEffectList((prev) => {
@@ -161,30 +155,6 @@ export default function RacePage() {
           startTimeRef,
           settings.dogSkillCooltime
         );
-
-        // useDogSkill(
-        //   characters,
-        //   bonusRef,
-        //   pausedRef,
-        //   setPausedList,
-        //   (index, type) => {
-        //     setEffectList((prev) => {
-        //       const updated = [...prev];
-        //       updated[index] = type;
-        //       return updated;
-        //     });
-        //     setTimeout(() => {
-        //       setEffectList((prev) => {
-        //         const updated = [...prev];
-        //         updated[index] = '';
-        //         return updated;
-        //       });
-        //     }, 2000);
-        //   },
-        //   dogSkillTimeRef,
-        //   startTimeRef,
-        //   settings.dogSkillCooltime
-        // );
 
         newAngles.forEach((angle, i) => {
           if (newFinished[i] || pausedRef.current[i]) return;
@@ -246,7 +216,7 @@ export default function RacePage() {
 
   const getXY = (angle: number, index: number) => {
     const a = 380,
-      b = 180,
+      b = 220,
       centerX = 570,
       centerY = 300;
     const rad = (angle * Math.PI) / 180;
