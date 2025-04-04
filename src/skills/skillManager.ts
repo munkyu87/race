@@ -6,6 +6,11 @@ type DogSkillState = {
   lastUsed: number | null;
 };
 
+interface Trap {
+  angle: number;
+  triggered: boolean;
+}
+
 // 고양이 스킬 (앞지르기)
 export function useCatSkill(
   characters: Character[],
@@ -27,7 +32,7 @@ export function useCatSkill(
 
   const canUse =
     catIndex !== -1 &&
-    lapValid &&
+    // lapValid &&
     elapsed >= catSkillCooltime &&
     (!lastUsed || now - lastUsed >= catSkillCooltime);
 
@@ -163,15 +168,64 @@ export function useDogSkill(
       pausedRef.current = paused;
       setPausedList([...paused]);
 
-      bonusRef.current![dogIndex] += 3;
+      bonusRef.current![dogIndex] += 4;
       state.phase = 'boosting';
       effectSetter(dogIndex, 'dog');
 
       // 3단계: m초 후 보너스 원상복구 + 상태 초기화
       setTimeout(() => {
-        bonusRef.current![dogIndex] -= 3;
+        bonusRef.current![dogIndex] -= 4;
         state.phase = 'idle';
       }, 8000);
     }, dogSkillCooltime);
   }
+}
+
+export function useFoxSkill(
+  characters: Character[],
+  angleRef: RefObject<number[]>,
+  bonusRef: RefObject<number[]>,
+  effectSetter: (index: number, type: string) => void,
+  foxSkillTimeRef: MutableRefObject<number | null>,
+  startTimeRef: RefObject<number>,
+  foxSkillCooltime: number,
+  trapsRef: RefObject<Trap[]>,
+  addTrapEffect: (angle: number) => void
+) {
+  const now = Date.now();
+  const foxIndex = characters.findIndex((c) => c.id === 'fox');
+  if (foxIndex === -1 || !startTimeRef.current || !angleRef.current) return;
+
+  const lastUsed = foxSkillTimeRef.current;
+  const canUse = !lastUsed || now - lastUsed >= foxSkillCooltime * 1000;
+
+  if (canUse) {
+    // 트랩 설치 (현재 여우 위치 기준)
+    const foxAngle = angleRef.current[foxIndex];
+    const trap: Trap = { angle: foxAngle + 60, triggered: false }; // +60도 앞에 설치
+    if (trapsRef.current) {
+      trapsRef.current.push(trap);
+      addTrapEffect(trap.angle);
+      foxSkillTimeRef.current = now;
+    }
+  }
+
+  // 모든 캐릭터 트랩 밟았는지 체크
+  characters.forEach((char, i) => {
+    if (i === foxIndex || !angleRef.current) return;
+    const charAngle = angleRef.current[i];
+    if (trapsRef.current) {
+      trapsRef.current.forEach((trap) => {
+        if (!trap.triggered && Math.abs(trap.angle - charAngle) < 10) {
+          // 트랩 발동
+          trap.triggered = true;
+          bonusRef.current![i] -= 2; // 속도 감소 (절반 효과 느낌)
+          effectSetter(i, 'foxtrap');
+          setTimeout(() => {
+            bonusRef.current![i] += 2;
+          }, 5000);
+        }
+      });
+    }
+  });
 }

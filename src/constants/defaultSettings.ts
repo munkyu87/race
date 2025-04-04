@@ -6,4 +6,5 @@ export const defaultSettings: GameSettings = {
   pigSkillCooltime: 10000,
   pigPauseDuration: 1000,
   dogSkillCooltime: 8000,
+  foxSkillCooltime: 4000,
 };

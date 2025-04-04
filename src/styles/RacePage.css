@@ -303,3 +303,13 @@ button {
     filter: drop-shadow(0 0 10px red);
   }
 }
+
+.trap-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: orange;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px 3px rgba(255, 165, 0, 0.8);
+}

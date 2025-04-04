@@ -31,6 +31,7 @@ export default function RacePage() {
   );
   const [ranking, setRanking] = useState<RankingItem[]>([]);
   const [racing, setRacing] = useState(false);
+  const [raceEnded, setRaceEnded] = useState(false);
   const [effectList, setEffectList] = useState<string[]>(
     characters.map(() => '')
   );
@@ -84,8 +85,44 @@ export default function RacePage() {
     }
   }, [triggerHorseEffect]);
 
+  const resetRace = () => {
+    const initialAngles = characters.map(() => 0);
+    const initialLaps = characters.map(() => 0);
+    const initialFinished = characters.map(() => false);
+    const initialEffects = characters.map(() => '');
+    const initialPaused = characters.map(() => false);
+    const initialBonus = characters.map(() => 0);
+
+    setAngleList(initialAngles);
+    setLapList(initialLaps);
+    setFinishedList(initialFinished);
+    setRanking([]);
+    setEffectList(initialEffects);
+    setPausedList(initialPaused);
+
+    angleRef.current = [...initialAngles];
+    lapRef.current = [...initialLaps];
+    finishedRef.current = [...initialFinished];
+    rankingRef.current = [];
+    pausedRef.current = [...initialPaused];
+    bonusRef.current = [...initialBonus];
+
+    lastBoostRef.current = Date.now();
+    catSkillTimeRef.current = null;
+    pigSkillTimeRef.current = null;
+    dogSkillTimeRef.current = null;
+
+    dogSkillStateRef.current = {
+      phase: 'idle',
+      lastUsed: null,
+    };
+
+    startTimeRef.current = Date.now();
+  };
+
   const startRace = () => {
     setRacing(true);
+    setRaceEnded(false);
     startTimeRef.current = Date.now();
 
     const interval = setInterval(() => {
@@ -207,6 +244,7 @@ export default function RacePage() {
         if (newFinished.every(Boolean)) {
           clearInterval(interval);
           setRacing(false);
+          setRaceEnded(true);
         }
 
         return newAngles;
@@ -320,15 +358,41 @@ export default function RacePage() {
         className="controls"
         style={{ textAlign: 'center', marginTop: '1.5rem' }}
       >
-        <Button
-          variant="contained"
-          color="success"
-          startIcon={<PlayArrowIcon />}
-          onClick={startRace}
-          disabled={racing}
-        >
-          {racing ? '레이싱 중...' : '레이싱 시작!'}
-        </Button>
+        {!racing && !raceEnded && (
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<PlayArrowIcon />}
+            onClick={startRace}
+          >
+            레이싱 시작!
+          </Button>
+        )}
+
+        {racing && (
+          <Button
+            variant="contained"
+            color="warning"
+            startIcon={<PlayArrowIcon />}
+            disabled
+          >
+            레이싱 중...
+          </Button>
+        )}
+
+        {!racing && raceEnded && (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<PlayArrowIcon />}
+            onClick={() => {
+              resetRace();
+              startRace();
+            }}
+          >
+            다시 시작하기
+          </Button>
+        )}
       </div>
 
       <div className="ranking-board">
