@@ -1,6 +1,11 @@
 import { MutableRefObject, RefObject } from 'react';
 import { Character, RankingItem } from '../types';
 
+type DogSkillState = {
+  phase: 'idle' | 'charging' | 'boosting';
+  lastUsed: number | null;
+};
+
 // 고양이 스킬 (앞지르기)
 export function useCatSkill(
   characters: Character[],
@@ -83,9 +88,14 @@ export function usePigSkill(
   effectSetter: (index: number, type: string) => void,
   pigSkillTimeRef: MutableRefObject<number | null>,
   startTimeRef: RefObject<number>,
-  pigSkillCooltime: number
+  pigSkillCooltime: number,
+  dogSkillStateRef: MutableRefObject<{
+    phase: 'idle' | 'charging' | 'boosting';
+    lastUsed: number | null;
+  }>
 ) {
   const pigIndex = characters.findIndex((c) => c.id === 'pig');
+  const dogIndex = characters.findIndex((c) => c.id === 'dog');
   const now = Date.now();
   if (!startTimeRef.current) return;
   const elapsed = now - startTimeRef.current;
@@ -98,16 +108,70 @@ export function usePigSkill(
 
   if (canUse) {
     const paused = characters.map((_, i) => i !== pigIndex);
+
     pausedRef.current = paused;
     setPausedList(paused);
 
     setTimeout(() => {
-      const resumed = characters.map(() => false);
+      const resumed = characters.map((_, i) => {
+        if (i === dogIndex && dogSkillStateRef.current.phase === 'charging') {
+          return true;
+        }
+        return false;
+      });
+
       pausedRef.current = resumed;
       setPausedList(resumed);
     }, 1000);
 
     effectSetter(pigIndex, 'pig');
     pigSkillTimeRef.current = now;
+  }
+}
+
+export function useDogSkill(
+  characters: Character[],
+  bonusRef: RefObject<number[]>,
+  pausedRef: React.MutableRefObject<boolean[]>,
+  setPausedList: (list: boolean[]) => void,
+  effectSetter: (index: number, type: string) => void,
+  dogSkillStateRef: React.MutableRefObject<DogSkillState>,
+  startTimeRef: RefObject<number>,
+  dogSkillCooltime: number
+) {
+  const dogIndex = characters.findIndex((c) => c.id === 'dog');
+  if (dogIndex === -1 || !startTimeRef.current) return;
+
+  const now = Date.now();
+  const state = dogSkillStateRef.current;
+
+  const canUse = state.phase === 'idle';
+  if (canUse) {
+    state.phase = 'charging';
+    state.lastUsed = now;
+
+    // 1단계: 멈춤
+    const paused = [...pausedRef.current];
+    paused[dogIndex] = true;
+    pausedRef.current = paused;
+    setPausedList([...paused]);
+    effectSetter(dogIndex, 'charge');
+
+    // 2단계: n초 후 질주 시작
+    setTimeout(() => {
+      paused[dogIndex] = false;
+      pausedRef.current = paused;
+      setPausedList([...paused]);
+
+      bonusRef.current![dogIndex] += 3;
+      state.phase = 'boosting';
+      effectSetter(dogIndex, 'dog');
+
+      // 3단계: m초 후 보너스 원상복구 + 상태 초기화
+      setTimeout(() => {
+        bonusRef.current![dogIndex] -= 3;
+        state.phase = 'idle';
+      }, 8000);
+    }, dogSkillCooltime);
   }
 }

@@ -124,6 +124,21 @@ function SetupPage() {
             max={20}
             valueLabelDisplay="auto"
           />
+          <Typography gutterBottom>
+            🐶 강아지: {settingsStore.settings.dogSkillCooltime / 1000}s
+          </Typography>
+          <Slider
+            value={settingsStore.settings.dogSkillCooltime / 1000}
+            onChange={(e, val) =>
+              settingsStore.updateSetting(
+                'dogSkillCooltime',
+                (val as number) * 1000
+              )
+            }
+            min={3}
+            max={20}
+            valueLabelDisplay="auto"
+          />
         </DialogContent>
       </Dialog>
 

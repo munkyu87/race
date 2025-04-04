@@ -243,3 +243,61 @@ button {
     filter: brightness(1.5);
   }
 }
+
+/* 기모으는 중 */
+.effect-charge {
+  animation: charge-glow 1s infinite ease-in-out;
+  filter: brightness(1.5) saturate(2);
+  transform: scale(1.1);
+}
+
+@keyframes charge-glow {
+  0% {
+    filter: brightness(1.3) saturate(1.5);
+    transform: scale(1);
+  }
+  50% {
+    filter: brightness(2) saturate(2.5);
+    transform: scale(1.15);
+  }
+  100% {
+    filter: brightness(1.3) saturate(1.5);
+    transform: scale(1);
+  }
+}
+
+/* 질주 중 */
+.effect-dog {
+  animation: dog-speed-blur 0.3s infinite linear;
+  filter: contrast(1.5) hue-rotate(-20deg);
+}
+@keyframes dog-speed-blur {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(2px) scale(1.02);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.effect-dog-boost {
+  animation: boost-glow 0.6s infinite alternate;
+  filter: drop-shadow(0 0 6px gold) brightness(1.5);
+}
+
+@keyframes boost-glow {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 6px orange);
+  }
+  100% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px red);
+  }
+}

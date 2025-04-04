@@ -10,11 +10,12 @@ export interface RankingItem {
   time: number;
 }
 
-export type EffectType = '' | 'cat' | 'horse' | 'pig';
+export type EffectType = '' | 'cat' | 'horse' | 'pig' | 'dog';
 
 export interface GameSettings {
   horseSkillCooltime: number; // 예: 8000 (ms)
   catSkillCooltime: number; // 예: 5000 (ms)
   pigSkillCooltime: number; // 예: 7000 (ms)
   pigPauseDuration: number; // 예: 1000 (ms)
+  dogSkillCooltime: number; // 예: 7000 (ms)
 }

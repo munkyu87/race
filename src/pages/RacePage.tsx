@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button, IconButton } from '@mui/material';
+import { Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import '../styles/RacePage.css';
@@ -10,6 +10,7 @@ import {
   useCatSkill,
   useHorseSkill,
   usePigSkill,
+  useDogSkill,
 } from '../skills/skillManager';
 import { settingsStore } from '../stores/settingsStore';
 
@@ -47,8 +48,15 @@ export default function RacePage() {
   const lastBoostRef = useRef<number>(Date.now());
   const catSkillTimeRef = useRef<number | null>(null);
   const pigSkillTimeRef = useRef<number | null>(null);
+  const dogSkillTimeRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
-
+  const dogSkillStateRef = useRef<{
+    phase: 'idle' | 'charging' | 'boosting';
+    lastUsed: number | null;
+  }>({
+    phase: 'idle',
+    lastUsed: null,
+  });
   const { settings } = settingsStore;
 
   useEffect(() => {
@@ -95,6 +103,7 @@ export default function RacePage() {
           () => setTriggerHorseEffect(true),
           settings.horseSkillCooltime
         );
+
         usePigSkill(
           characters,
           pausedRef,
@@ -115,8 +124,67 @@ export default function RacePage() {
           },
           pigSkillTimeRef,
           startTimeRef,
-          settings.pigSkillCooltime
+          settings.pigSkillCooltime,
+          dogSkillStateRef
         );
+
+        // 🐶 강아지 스킬 추가!
+        useDogSkill(
+          characters,
+          bonusRef,
+          pausedRef,
+          setPausedList,
+          (index, type) => {
+            setEffectList((prev) => {
+              const updated = [...prev];
+              updated[index] =
+                type === 'dog' && dogSkillStateRef.current.phase === 'boosting'
+                  ? 'dog-boost'
+                  : type;
+              return updated;
+            });
+            // setEffectList((prev) => {
+            //   const updated = [...prev];
+            //   updated[index] = type;
+            //   return updated;
+            // });
+
+            setTimeout(() => {
+              setEffectList((prev) => {
+                const updated = [...prev];
+                updated[index] = '';
+                return updated;
+              });
+            }, settings.dogSkillCooltime);
+          },
+          dogSkillStateRef,
+          startTimeRef,
+          settings.dogSkillCooltime
+        );
+
+        // useDogSkill(
+        //   characters,
+        //   bonusRef,
+        //   pausedRef,
+        //   setPausedList,
+        //   (index, type) => {
+        //     setEffectList((prev) => {
+        //       const updated = [...prev];
+        //       updated[index] = type;
+        //       return updated;
+        //     });
+        //     setTimeout(() => {
+        //       setEffectList((prev) => {
+        //         const updated = [...prev];
+        //         updated[index] = '';
+        //         return updated;
+        //       });
+        //     }, 2000);
+        //   },
+        //   dogSkillTimeRef,
+        //   startTimeRef,
+        //   settings.dogSkillCooltime
+        // );
 
         newAngles.forEach((angle, i) => {
           if (newFinished[i] || pausedRef.current[i]) return;
