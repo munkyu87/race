@@ -64,6 +64,22 @@ export default function RacePage() {
   const foxSkillTimeRef = useRef<number | null>(null);
   const trapsRef = useRef<Trap[]>([]);
   const { settings } = settingsStore;
+  const [countdown, setCountdown] = useState<number | null>(null);
+  useEffect(() => {
+    if (countdown === null) return;
+
+    if (countdown === 0) {
+      setTimeout(() => {
+        setCountdown(null);
+        startRace();
+      }, 800);
+    } else {
+      const timer = setTimeout(() => {
+        setCountdown((prev) => (prev !== null ? prev - 1 : null));
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
 
   useEffect(() => {
     if (!storedPlayers) navigate('/');
@@ -129,7 +145,6 @@ export default function RacePage() {
 
   const startRace = () => {
     setRacing(true);
-    setRaceEnded(false);
     startTimeRef.current = Date.now();
 
     const interval = setInterval(() => {
@@ -269,7 +284,6 @@ export default function RacePage() {
         if (newFinished.every(Boolean)) {
           clearInterval(interval);
           setRacing(false);
-          setRaceEnded(true);
         }
 
         return newAngles;
@@ -355,9 +369,61 @@ export default function RacePage() {
       </div>
 
       <div className="oval-track-wrapper">
-        <div className="track-markers">
-          <div className="start-line" />
-          <div className="finish-line" />
+        <div
+          className="controls"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 10,
+          }}
+        >
+          {countdown !== null && (
+            <motion.div
+              key={countdown}
+              className={`countdown-text ${
+                countdown === 0 ? 'start-final' : ''
+              }`}
+              initial={{ scale: 2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              {countdown === 0 ? 'START!' : countdown}
+            </motion.div>
+          )}
+          {!racing && countdown === null && (
+            <Button
+              variant="outlined"
+              onClick={() => {
+                resetRace();
+                setCountdown(3);
+              }}
+              startIcon={<PlayArrowIcon />}
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                color: 'white',
+                border: '2px solid white',
+                borderRadius: '50px',
+                marginLeft: '0.1rem',
+                marginBottom: '0.5rem',
+                padding: '0.8rem 0.9rem',
+                fontWeight: 'bold',
+                fontSize: '1.2rem',
+                letterSpacing: '1px',
+                boxShadow: '0 0 12px rgba(255,255,255,0.3)',
+                transition: 'all 0.3s ease-in-out',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.3)',
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 0 20px rgba(255,255,255,0.5)',
+                },
+              }}
+            >
+              START
+            </Button>
+          )}
         </div>
         <div className="oval-track">
           {trapsRef.current
@@ -380,20 +446,6 @@ export default function RacePage() {
                 />
               );
             })}
-          {/* {trapsRef.current
-            .filter((t) => !t.used)
-            .map((trap, i) => {
-              const rad = (trap.angle * Math.PI) / 180;
-              const x = 570 + 380 * Math.cos(rad);
-              const y = 300 + 220 * Math.sin(rad);
-              return (
-                <div
-                  key={`trap-${i}`}
-                  className="trap-dot"
-                  style={{ left: x, top: y }}
-                />
-              );
-            })} */}
           {characters.map((char, i) => {
             const pos = getXY(angleList[i], i);
             return (
@@ -411,47 +463,6 @@ export default function RacePage() {
             );
           })}
         </div>
-      </div>
-
-      <div
-        className="controls"
-        style={{ textAlign: 'center', marginTop: '1.5rem' }}
-      >
-        {!racing && !raceEnded && (
-          <Button
-            variant="contained"
-            color="success"
-            startIcon={<PlayArrowIcon />}
-            onClick={startRace}
-          >
-            레이싱 시작!
-          </Button>
-        )}
-
-        {racing && (
-          <Button
-            variant="contained"
-            color="warning"
-            startIcon={<PlayArrowIcon />}
-            disabled
-          >
-            레이싱 중...
-          </Button>
-        )}
-
-        {!racing && raceEnded && (
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<PlayArrowIcon />}
-            onClick={() => {
-              resetRace();
-              startRace();
-            }}
-          >
-            다시 시작하기
-          </Button>
-        )}
       </div>
 
       <div className="ranking-board">
