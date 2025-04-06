@@ -6,9 +6,11 @@ type DogSkillState = {
   lastUsed: number | null;
 };
 
-interface Trap {
+export interface Trap {
   angle: number;
-  triggered: boolean;
+  createdAt: number;
+  used: boolean;
+  ownerId: string;
 }
 
 // 고양이 스킬 (앞지르기)
@@ -181,51 +183,124 @@ export function useDogSkill(
   }
 }
 
-export function useFoxSkill(
+export const useFoxSkill = (
   characters: Character[],
-  angleRef: RefObject<number[]>,
-  bonusRef: RefObject<number[]>,
-  effectSetter: (index: number, type: string) => void,
-  foxSkillTimeRef: MutableRefObject<number | null>,
-  startTimeRef: RefObject<number>,
-  foxSkillCooltime: number,
-  trapsRef: RefObject<Trap[]>,
-  addTrapEffect: (angle: number) => void
-) {
-  const now = Date.now();
+  trapsRef: React.MutableRefObject<Trap[]>,
+  foxSkillTimeRef: React.MutableRefObject<number | null>,
+  startTimeRef: React.MutableRefObject<number>,
+  angleRef: React.MutableRefObject<number[]>,
+  cooltime: number
+) => {
   const foxIndex = characters.findIndex((c) => c.id === 'fox');
-  if (foxIndex === -1 || !startTimeRef.current || !angleRef.current) return;
+  if (foxIndex === -1) return;
 
+  const now = Date.now();
   const lastUsed = foxSkillTimeRef.current;
-  const canUse = !lastUsed || now - lastUsed >= foxSkillCooltime * 1000;
+  const canUse =
+    now - startTimeRef.current >= 5000 &&
+    (!lastUsed || now - lastUsed >= cooltime);
 
   if (canUse) {
-    // 트랩 설치 (현재 여우 위치 기준)
-    const foxAngle = angleRef.current[foxIndex];
-    const trap: Trap = { angle: foxAngle + 60, triggered: false }; // +60도 앞에 설치
-    if (trapsRef.current) {
-      trapsRef.current.push(trap);
-      addTrapEffect(trap.angle);
-      foxSkillTimeRef.current = now;
-    }
+    const angle = angleRef.current[foxIndex] % 360;
+    trapsRef.current.push({
+      angle,
+      createdAt: now,
+      used: false,
+      ownerId: characters[foxIndex].id,
+    });
+    foxSkillTimeRef.current = now;
   }
+};
 
-  // 모든 캐릭터 트랩 밟았는지 체크
-  characters.forEach((char, i) => {
-    if (i === foxIndex || !angleRef.current) return;
-    const charAngle = angleRef.current[i];
-    if (trapsRef.current) {
-      trapsRef.current.forEach((trap) => {
-        if (!trap.triggered && Math.abs(trap.angle - charAngle) < 10) {
-          // 트랩 발동
-          trap.triggered = true;
-          bonusRef.current![i] -= 2; // 속도 감소 (절반 효과 느낌)
-          effectSetter(i, 'foxtrap');
-          setTimeout(() => {
-            bonusRef.current![i] += 2;
-          }, 5000);
-        }
-      });
-    }
+export const checkFoxTrapTrigger = (
+  characters: Character[],
+  trapsRef: React.MutableRefObject<Trap[]>,
+  angleRef: React.MutableRefObject<number[]>,
+  pausedRef: React.MutableRefObject<boolean[]>,
+  setPausedList: (list: boolean[]) => void,
+  setEffectList: React.Dispatch<React.SetStateAction<string[]>>,
+  foxTrapDuration: number
+) => {
+  const now = Date.now();
+  characters.forEach((_, i) => {
+    trapsRef.current.forEach((trap) => {
+      const angleDiff = Math.abs((angleRef.current[i] % 360) - trap.angle);
+
+      if (
+        !trap.used &&
+        trap.ownerId !== characters[i].id &&
+        now - trap.createdAt >= 1000 && // 생성 1초 이후부터 발동
+        angleDiff < 10
+      ) {
+        trap.used = true;
+
+        // 2초간 정지 처리
+        const newPaused = [...pausedRef.current];
+        newPaused[i] = true;
+        pausedRef.current = newPaused;
+        setPausedList(newPaused);
+
+        // 이펙트
+        setEffectList((prev) => {
+          const updated = [...prev];
+          updated[i] = 'foxtrap';
+          return updated;
+        });
+
+        setTimeout(() => {
+          const resumed = [...pausedRef.current];
+          resumed[i] = false;
+          pausedRef.current = resumed;
+          setPausedList(resumed);
+
+          setEffectList((prev) => {
+            const updated = [...prev];
+            updated[i] = '';
+            return updated;
+          });
+        }, foxTrapDuration);
+      }
+    });
   });
-}
+};
+// export const checkFoxTrapTrigger = (
+//   characters: Character[],
+//   trapsRef: React.MutableRefObject<Trap[]>,
+//   angleRef: React.MutableRefObject<number[]>,
+//   bonusRef: React.MutableRefObject<number[]>,
+//   setEffectList: React.Dispatch<React.SetStateAction<string[]>>
+// ) => {
+//   const now = Date.now();
+//   characters.forEach((_, i) => {
+//     trapsRef.current.forEach((trap) => {
+//       const angleDiff = Math.abs((angleRef.current[i] % 360) - trap.angle);
+
+//       // ✅ 발동 조건 추가: 생성 후 1초 이상 경과 & 주인 아님 & 각도 근접 & 미사용
+//       const canTrigger =
+//         !trap.used &&
+//         trap.ownerId !== characters[i].id &&
+//         angleDiff < 10 &&
+//         now - trap.createdAt >= 1000; // 🔥 여기 핵심!
+
+//       if (canTrigger) {
+//         trap.used = true;
+//         bonusRef.current[i] -= 2.5;
+
+//         setEffectList((prev) => {
+//           const updated = [...prev];
+//           updated[i] = 'foxtrap';
+//           return updated;
+//         });
+
+//         setTimeout(() => {
+//           bonusRef.current[i] += 2.5;
+//           setEffectList((prev) => {
+//             const updated = [...prev];
+//             updated[i] = '';
+//             return updated;
+//           });
+//         }, 5000);
+//       }
+//     });
+//   });
+// };

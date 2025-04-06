@@ -139,6 +139,21 @@ function SetupPage() {
             max={20}
             valueLabelDisplay="auto"
           />
+          <Typography gutterBottom>
+            🦊 여우: {settingsStore.settings.foxSkillCooltime / 1000}s
+          </Typography>
+          <Slider
+            value={settingsStore.settings.foxSkillCooltime / 1000}
+            onChange={(e, val) =>
+              settingsStore.updateSetting(
+                'foxSkillCooltime',
+                (val as number) * 1000
+              )
+            }
+            min={3}
+            max={20}
+            valueLabelDisplay="auto"
+          />
         </DialogContent>
       </Dialog>
 

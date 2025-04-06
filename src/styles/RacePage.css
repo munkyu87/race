@@ -305,11 +305,20 @@ button {
 }
 
 .trap-dot {
+  position: absolute;
   width: 10px;
   height: 10px;
+  background-color: orange;
   border-radius: 50%;
-  background: orange;
-  position: absolute;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 10px 3px rgba(255, 165, 0, 0.8);
+  box-shadow: 0 0 8px orange;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }

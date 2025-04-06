@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import '../styles/RacePage.css';
 import { Character, RankingItem } from '../types';
 import {
@@ -11,8 +12,10 @@ import {
   useHorseSkill,
   usePigSkill,
   useDogSkill,
+  Trap,
 } from '../skills/skillManager';
 import { settingsStore } from '../stores/settingsStore';
+import { useFoxSkill, checkFoxTrapTrigger } from '../skills/skillManager';
 
 export default function RacePage() {
   const navigate = useNavigate();
@@ -58,6 +61,8 @@ export default function RacePage() {
     phase: 'idle',
     lastUsed: null,
   });
+  const foxSkillTimeRef = useRef<number | null>(null);
+  const trapsRef = useRef<Trap[]>([]);
   const { settings } = settingsStore;
 
   useEffect(() => {
@@ -111,6 +116,8 @@ export default function RacePage() {
     catSkillTimeRef.current = null;
     pigSkillTimeRef.current = null;
     dogSkillTimeRef.current = null;
+    foxSkillTimeRef.current = null;
+    trapsRef.current = [];
 
     dogSkillStateRef.current = {
       phase: 'idle',
@@ -191,6 +198,24 @@ export default function RacePage() {
           dogSkillStateRef,
           startTimeRef,
           settings.dogSkillCooltime
+        );
+
+        useFoxSkill(
+          characters,
+          trapsRef,
+          foxSkillTimeRef,
+          startTimeRef,
+          angleRef,
+          settings.foxSkillCooltime
+        );
+        checkFoxTrapTrigger(
+          characters,
+          trapsRef,
+          angleRef,
+          pausedRef,
+          setPausedList,
+          setEffectList,
+          settings.foxTrapDuration
         );
 
         newAngles.forEach((angle, i) => {
@@ -335,6 +360,40 @@ export default function RacePage() {
           <div className="finish-line" />
         </div>
         <div className="oval-track">
+          {trapsRef.current
+            .filter((t) => !t.used)
+            .map((trap, i) => {
+              const rad = (trap.angle * Math.PI) / 180;
+              const x = 570 + 380 * Math.cos(rad);
+              const y = 300 + 220 * Math.sin(rad);
+              return (
+                <ReportProblemIcon
+                  key={`trap-${i}`}
+                  sx={{
+                    position: 'absolute',
+                    left: x,
+                    top: y,
+                    color: 'red',
+                    fontSize: 36,
+                    animation: 'blink 1s infinite',
+                  }}
+                />
+              );
+            })}
+          {/* {trapsRef.current
+            .filter((t) => !t.used)
+            .map((trap, i) => {
+              const rad = (trap.angle * Math.PI) / 180;
+              const x = 570 + 380 * Math.cos(rad);
+              const y = 300 + 220 * Math.sin(rad);
+              return (
+                <div
+                  key={`trap-${i}`}
+                  className="trap-dot"
+                  style={{ left: x, top: y }}
+                />
+              );
+            })} */}
           {characters.map((char, i) => {
             const pos = getXY(angleList[i], i);
             return (
