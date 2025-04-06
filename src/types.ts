@@ -10,6 +10,13 @@ export interface RankingItem {
   time: number;
 }
 
+export interface LiveRankingItem {
+  id: string;
+  name: string;
+  lap: number;
+  angle: number;
+}
+
 export type EffectType = '' | 'cat' | 'horse' | 'pig' | 'dog' | 'fox';
 
 export interface GameSettings {

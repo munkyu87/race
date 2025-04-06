@@ -34,7 +34,6 @@ export default function RacePage() {
   );
   const [ranking, setRanking] = useState<RankingItem[]>([]);
   const [racing, setRacing] = useState(false);
-  const [raceEnded, setRaceEnded] = useState(false);
   const [effectList, setEffectList] = useState<string[]>(
     characters.map(() => '')
   );
@@ -120,6 +119,8 @@ export default function RacePage() {
     setRanking([]);
     setEffectList(initialEffects);
     setPausedList(initialPaused);
+    setTriggerHorseEffect(false);
+    setCountdown(null);
 
     angleRef.current = [...initialAngles];
     lapRef.current = [...initialLaps];
@@ -315,34 +316,48 @@ export default function RacePage() {
 
   return (
     <div className="race-container">
-      <div
-        className="race-header"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-        }}
-      >
+      <div className="race-top-bar">
         <Button
-          variant="contained"
-          color="info"
-          startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/')}
+          startIcon={<ArrowBackIcon />}
           sx={{
-            position: 'absolute',
-            left: 16,
-            top: 16,
-            fontSize: '1rem',
-            padding: '8px 16px',
+            color: 'white',
+            border: '2px solid white',
+            borderRadius: '30px',
+            padding: '6px 16px',
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            fontWeight: 'bold',
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.3)',
+              transform: 'scale(1.05)',
+              boxShadow: '0 0 10px rgba(255,255,255,0.5)',
+            },
           }}
         >
           세팅으로
         </Button>
-        <h1 style={{ margin: '1rem 0' }}>🏁 레이스 스타트 🏁</h1>
+        {/* <div className="race-title">🏁 레이스 스타트 🏁</div> */}
+
+        <div className="race-title-wrap">
+          <div className="race-title">🏁 레이스 스타트 🏁</div>
+          {/* <div className="lap-info">총 바퀴 수: {totalLaps}바퀴</div> */}
+        </div>
+        <div style={{ width: '172px' }}></div>
+        {/* <div className="lap-info">🎯 총 바퀴 수: {totalLaps}바퀴</div> */}
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+      <div className="race-players">
+        {characters.map((char, i) => (
+          <div className="race-player" key={char.id}>
+            <img src={char.image} alt={char.name} />
+            <span style={{ marginLeft: '5px' }}>
+              {char.name}
+              {/* {i + 1} - {lapList[i]}바퀴 */}
+            </span>
+          </div>
+        ))}
+      </div>
+      {/* <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
         <ul
           style={{
             display: 'flex',
@@ -366,7 +381,7 @@ export default function RacePage() {
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
 
       <div className="oval-track-wrapper">
         <div
@@ -424,6 +439,19 @@ export default function RacePage() {
               START
             </Button>
           )}
+        </div>
+
+        <div
+          style={{
+            position: 'absolute',
+            top: '32.5%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 10,
+            fontWeight: 700,
+          }}
+        >
+          🎯 총 바퀴 수: {totalLaps}바퀴
         </div>
         <div className="oval-track">
           {trapsRef.current
