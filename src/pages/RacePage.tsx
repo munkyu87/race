@@ -5,6 +5,7 @@ import { Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import '../styles/RacePage.css';
 import { Character, RankingItem } from '../types';
 import {
@@ -15,7 +16,7 @@ import {
   Trap,
 } from '../skills/skillManager';
 import { settingsStore } from '../stores/settingsStore';
-import { useFoxSkill, checkFoxTrapTrigger } from '../skills/skillManager';
+import { useFoxSkill } from '../skills/skillManager';
 
 export default function RacePage() {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ export default function RacePage() {
     characters.map(() => false)
   );
   const [triggerHorseEffect, setTriggerHorseEffect] = useState(false);
+  const [foxTargetIndex, setFoxTargetIndex] = useState<number | null>(null);
 
   const lapRef = useRef([...lapList]);
   const finishedRef = useRef([...finishedList]);
@@ -56,17 +58,14 @@ export default function RacePage() {
   const dogSkillStateRef = useRef<{
     phase: 'idle' | 'charging' | 'boosting';
     lastUsed: number | null;
-  }>({
-    phase: 'idle',
-    lastUsed: null,
-  });
+  }>({ phase: 'idle', lastUsed: null });
   const foxSkillTimeRef = useRef<number | null>(null);
   const trapsRef = useRef<Trap[]>([]);
   const { settings } = settingsStore;
   const [countdown, setCountdown] = useState<number | null>(null);
+
   useEffect(() => {
     if (countdown === null) return;
-
     if (countdown === 0) {
       setTimeout(() => {
         setCountdown(null);
@@ -121,6 +120,7 @@ export default function RacePage() {
     setPausedList(initialPaused);
     setTriggerHorseEffect(false);
     setCountdown(null);
+    setFoxTargetIndex(null);
 
     angleRef.current = [...initialAngles];
     lapRef.current = [...initialLaps];
@@ -135,12 +135,7 @@ export default function RacePage() {
     dogSkillTimeRef.current = null;
     foxSkillTimeRef.current = null;
     trapsRef.current = [];
-
-    dogSkillStateRef.current = {
-      phase: 'idle',
-      lastUsed: null,
-    };
-
+    dogSkillStateRef.current = { phase: 'idle', lastUsed: null };
     startTimeRef.current = Date.now();
   };
 
@@ -163,7 +158,6 @@ export default function RacePage() {
           () => setTriggerHorseEffect(true),
           settings.horseSkillCooltime
         );
-
         usePigSkill(
           characters,
           pausedRef,
@@ -218,20 +212,19 @@ export default function RacePage() {
 
         useFoxSkill(
           characters,
-          trapsRef,
+          angleRef,
+          bonusRef,
           foxSkillTimeRef,
           startTimeRef,
-          angleRef,
+          (index, type) => {
+            setEffectList((prev) => {
+              const updated = [...prev];
+              updated[index] = type;
+              return updated;
+            });
+            setFoxTargetIndex(index);
+          },
           settings.foxSkillCooltime
-        );
-        checkFoxTrapTrigger(
-          characters,
-          trapsRef,
-          angleRef,
-          pausedRef,
-          setPausedList,
-          setEffectList,
-          settings.foxTrapDuration
         );
 
         newAngles.forEach((angle, i) => {
@@ -336,53 +329,20 @@ export default function RacePage() {
         >
           세팅으로
         </Button>
-        {/* <div className="race-title">🏁 레이스 스타트 🏁</div> */}
-
         <div className="race-title-wrap">
           <div className="race-title">🏁 레이스 스타트 🏁</div>
-          {/* <div className="lap-info">총 바퀴 수: {totalLaps}바퀴</div> */}
         </div>
         <div style={{ width: '172px' }}></div>
-        {/* <div className="lap-info">🎯 총 바퀴 수: {totalLaps}바퀴</div> */}
       </div>
 
       <div className="race-players">
         {characters.map((char, i) => (
           <div className="race-player" key={char.id}>
             <img src={char.image} alt={char.name} />
-            <span style={{ marginLeft: '5px' }}>
-              {char.name}
-              {/* {i + 1} - {lapList[i]}바퀴 */}
-            </span>
+            <span style={{ marginLeft: '5px' }}>{char.name}</span>
           </div>
         ))}
       </div>
-      {/* <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        <ul
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '1rem',
-            listStyle: 'none',
-            padding: 0,
-            flexWrap: 'wrap',
-          }}
-        >
-          <h3>🎯 총 바퀴 수: {totalLaps}바퀴</h3>
-          {characters.map((char, i) => (
-            <li
-              key={char.id}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-            >
-              <img src={char.image} alt={char.name} width={30} />
-              <span>
-                {i + 1} - {lapList[i]}바퀴
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div> */}
-
       <div className="oval-track-wrapper">
         <div
           className="controls"
@@ -476,18 +436,39 @@ export default function RacePage() {
             })}
           {characters.map((char, i) => {
             const pos = getXY(angleList[i], i);
+            const effect = effectList[i];
+            const fox = characters.find((c) => c.id === 'fox');
             return (
-              <motion.img
-                key={char.id}
-                src={char.image}
-                alt={char.name}
-                className={`character-img ${
-                  effectList[i] ? `effect-${effectList[i]}` : ''
-                }`}
-                animate={{ left: pos.x, top: pos.y }}
-                transition={{ duration: 0.5 }}
-                style={{ position: 'absolute' }}
-              />
+              <React.Fragment key={char.id}>
+                {/* 여우 스킬 이펙트: 여우 얼굴 아이콘 */}
+                {effect === 'foxreverse' && (
+                  <img
+                    src={fox!.image}
+                    alt="fox effect"
+                    style={{
+                      position: 'absolute',
+                      left: pos.x + 5,
+                      top: pos.y - 40,
+                      width: 32,
+                      height: 32,
+                      zIndex: 11,
+                      animation: 'blink 0.8s ease-in-out infinite',
+                    }}
+                  />
+                )}
+
+                {/* 캐릭터 */}
+                <motion.img
+                  src={char.image}
+                  alt={char.name}
+                  className={`character-img ${
+                    effect ? `effect-${effect}` : ''
+                  }`}
+                  animate={{ left: pos.x, top: pos.y }}
+                  transition={{ duration: 0.5 }}
+                  style={{ position: 'absolute' }}
+                />
+              </React.Fragment>
             );
           })}
         </div>

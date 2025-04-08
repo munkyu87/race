@@ -5,7 +5,7 @@ export const defaultSettings: GameSettings = {
   catSkillCooltime: 3000,
   pigSkillCooltime: 12000,
   pigPauseDuration: 1000,
-  dogSkillCooltime: 9000,
+  dogSkillCooltime: 7000,
   foxSkillCooltime: 9000,
   foxTrapDuration: 2000,
 };

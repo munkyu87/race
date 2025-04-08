@@ -183,124 +183,50 @@ export function useDogSkill(
   }
 }
 
-export const useFoxSkill = (
+export function useFoxSkill(
   characters: Character[],
-  trapsRef: React.MutableRefObject<Trap[]>,
+  angleRef: React.MutableRefObject<number[]>,
+  bonusRef: React.MutableRefObject<number[]>,
   foxSkillTimeRef: React.MutableRefObject<number | null>,
   startTimeRef: React.MutableRefObject<number>,
-  angleRef: React.MutableRefObject<number[]>,
+  effectSetter: (index: number, type: string) => void,
   cooltime: number
-) => {
-  const foxIndex = characters.findIndex((c) => c.id === 'fox');
-  if (foxIndex === -1) return;
-
+) {
   const now = Date.now();
+  const foxIndex = characters.findIndex((c) => c.id === 'fox');
+  const dogIndex = characters.findIndex((c) => c.id === 'dog');
+
+  if (foxIndex === -1 || !startTimeRef.current) return;
+  if (dogIndex === -1 || !startTimeRef.current) return;
+
   const lastUsed = foxSkillTimeRef.current;
   const canUse =
     now - startTimeRef.current >= 5000 &&
     (!lastUsed || now - lastUsed >= cooltime);
 
-  if (canUse) {
-    const angle = angleRef.current[foxIndex] % 360;
-    trapsRef.current.push({
-      angle,
-      createdAt: now,
-      used: false,
-      ownerId: characters[foxIndex].id,
-    });
-    foxSkillTimeRef.current = now;
-  }
-};
+  if (!canUse) return;
 
-export const checkFoxTrapTrigger = (
-  characters: Character[],
-  trapsRef: React.MutableRefObject<Trap[]>,
-  angleRef: React.MutableRefObject<number[]>,
-  pausedRef: React.MutableRefObject<boolean[]>,
-  setPausedList: (list: boolean[]) => void,
-  setEffectList: React.Dispatch<React.SetStateAction<string[]>>,
-  foxTrapDuration: number
-) => {
-  const now = Date.now();
-  characters.forEach((_, i) => {
-    trapsRef.current.forEach((trap) => {
-      const angleDiff = Math.abs((angleRef.current[i] % 360) - trap.angle);
+  // 랭킹 정렬 (여우 제외)
+  const sorted = characters
+    .map((_, i) => ({
+      index: i,
+      angle: angleRef.current[i],
+    }))
+    .filter((c) => c.index !== foxIndex && c.index !== dogIndex)
+    .sort((a, b) => b.angle - a.angle);
 
-      if (
-        !trap.used &&
-        trap.ownerId !== characters[i].id &&
-        now - trap.createdAt >= 1000 && // 생성 1초 이후부터 발동
-        angleDiff < 10
-      ) {
-        trap.used = true;
+  const target = sorted[0];
+  if (!target) return;
 
-        // 2초간 정지 처리
-        const newPaused = [...pausedRef.current];
-        newPaused[i] = true;
-        pausedRef.current = newPaused;
-        setPausedList(newPaused);
+  // 역주행 효과
+  const idx = target.index;
+  bonusRef.current[idx] -= 2;
+  effectSetter(idx, 'foxreverse');
 
-        // 이펙트
-        setEffectList((prev) => {
-          const updated = [...prev];
-          updated[i] = 'foxtrap';
-          return updated;
-        });
+  setTimeout(() => {
+    bonusRef.current[idx] += 2;
+    effectSetter(idx, '');
+  }, 2000);
 
-        setTimeout(() => {
-          const resumed = [...pausedRef.current];
-          resumed[i] = false;
-          pausedRef.current = resumed;
-          setPausedList(resumed);
-
-          setEffectList((prev) => {
-            const updated = [...prev];
-            updated[i] = '';
-            return updated;
-          });
-        }, foxTrapDuration);
-      }
-    });
-  });
-};
-// export const checkFoxTrapTrigger = (
-//   characters: Character[],
-//   trapsRef: React.MutableRefObject<Trap[]>,
-//   angleRef: React.MutableRefObject<number[]>,
-//   bonusRef: React.MutableRefObject<number[]>,
-//   setEffectList: React.Dispatch<React.SetStateAction<string[]>>
-// ) => {
-//   const now = Date.now();
-//   characters.forEach((_, i) => {
-//     trapsRef.current.forEach((trap) => {
-//       const angleDiff = Math.abs((angleRef.current[i] % 360) - trap.angle);
-
-//       // ✅ 발동 조건 추가: 생성 후 1초 이상 경과 & 주인 아님 & 각도 근접 & 미사용
-//       const canTrigger =
-//         !trap.used &&
-//         trap.ownerId !== characters[i].id &&
-//         angleDiff < 10 &&
-//         now - trap.createdAt >= 1000; // 🔥 여기 핵심!
-
-//       if (canTrigger) {
-//         trap.used = true;
-//         bonusRef.current[i] -= 2.5;
-
-//         setEffectList((prev) => {
-//           const updated = [...prev];
-//           updated[i] = 'foxtrap';
-//           return updated;
-//         });
-
-//         setTimeout(() => {
-//           bonusRef.current[i] += 2.5;
-//           setEffectList((prev) => {
-//             const updated = [...prev];
-//             updated[i] = '';
-//             return updated;
-//           });
-//         }, 5000);
-//       }
-//     });
-//   });
-// };
+  foxSkillTimeRef.current = now;
+}
