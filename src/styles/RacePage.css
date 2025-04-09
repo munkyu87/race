@@ -433,3 +433,52 @@ button {
     opacity: 0;
   }
 }
+
+/* 여우 스킬 효과 */
+.character-img.effect-foxreverse {
+  filter: hue-rotate(180deg) brightness(1.2);
+  animation: reverse-blink 0.2s infinite alternate;
+}
+
+@keyframes reverse-blink {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    transform: scale(1.1) rotate(3deg);
+  }
+}
+
+.effect-panda-hit {
+  animation: pandaHitShake 0.5s ease-in-out;
+}
+
+@keyframes pandaHitShake {
+  0% {
+    transform: translateX(0px);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+  100% {
+    transform: translateX(0px);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.1);
+  }
+}

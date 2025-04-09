@@ -14,6 +14,7 @@ import {
   usePigSkill,
   useDogSkill,
   Trap,
+  usePandaSkill,
 } from '../skills/skillManager';
 import { settingsStore } from '../stores/settingsStore';
 import { useFoxSkill } from '../skills/skillManager';
@@ -60,6 +61,7 @@ export default function RacePage() {
     lastUsed: number | null;
   }>({ phase: 'idle', lastUsed: null });
   const foxSkillTimeRef = useRef<number | null>(null);
+  const pandaSkillTimeRef = useRef<number | null>(null);
   const trapsRef = useRef<Trap[]>([]);
   const { settings } = settingsStore;
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -134,6 +136,7 @@ export default function RacePage() {
     pigSkillTimeRef.current = null;
     dogSkillTimeRef.current = null;
     foxSkillTimeRef.current = null;
+    pandaSkillTimeRef.current = null;
     trapsRef.current = [];
     dogSkillStateRef.current = { phase: 'idle', lastUsed: null };
     startTimeRef.current = Date.now();
@@ -225,6 +228,23 @@ export default function RacePage() {
             setFoxTargetIndex(index);
           },
           settings.foxSkillCooltime
+        );
+
+        usePandaSkill(
+          characters,
+          angleRef,
+          pausedRef,
+          setPausedList,
+          (index, type) => {
+            setEffectList((prev) => {
+              const updated = [...prev];
+              updated[index] = type;
+              return updated;
+            });
+          },
+          pandaSkillTimeRef,
+          startTimeRef,
+          settings.pandaSkillCooltime
         );
 
         newAngles.forEach((angle, i) => {
@@ -456,7 +476,22 @@ export default function RacePage() {
                     }}
                   />
                 )}
-
+                {effect === 'panda-hit' && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: pos.x + 10,
+                      top: pos.y - 40,
+                      fontSize: '24px',
+                      fontWeight: 'bold',
+                      color: '#8e44ad', // 보라색 계열
+                      animation: 'blink 1s ease-in-out',
+                      zIndex: 12,
+                    }}
+                  >
+                    💢
+                  </div>
+                )}
                 {/* 캐릭터 */}
                 <motion.img
                   src={char.image}
@@ -464,9 +499,17 @@ export default function RacePage() {
                   className={`character-img ${
                     effect ? `effect-${effect}` : ''
                   }`}
-                  animate={{ left: pos.x, top: pos.y }}
+                  animate={{
+                    left: pos.x,
+                    top: pos.y,
+                    scale: effect === 'panda' ? 1.3 : 1, // 팬더 크기 변화
+                    boxShadow:
+                      effect === 'panda'
+                        ? '0 0 25px 10px rgba(128,0,255,0.5)'
+                        : 'none',
+                  }}
                   transition={{ duration: 0.5 }}
-                  style={{ position: 'absolute' }}
+                  style={{ position: 'absolute', borderRadius: '50%' }}
                 />
               </React.Fragment>
             );

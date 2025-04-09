@@ -206,7 +206,6 @@ export function useFoxSkill(
 
   if (!canUse) return;
 
-  // 랭킹 정렬 (여우 제외)
   const sorted = characters
     .map((_, i) => ({
       index: i,
@@ -218,7 +217,6 @@ export function useFoxSkill(
   const target = sorted[0];
   if (!target) return;
 
-  // 역주행 효과
   const idx = target.index;
   bonusRef.current[idx] -= 2;
   effectSetter(idx, 'foxreverse');
@@ -229,4 +227,63 @@ export function useFoxSkill(
   }, 2000);
 
   foxSkillTimeRef.current = now;
+}
+
+export function usePandaSkill(
+  characters: Character[],
+  angleRef: React.MutableRefObject<number[]>,
+  pausedRef: React.MutableRefObject<boolean[]>,
+  setPausedList: (list: boolean[]) => void,
+  effectSetter: (index: number, type: string) => void,
+  pandaSkillTimeRef: React.MutableRefObject<number | null>,
+  startTimeRef: React.MutableRefObject<number>,
+  cooltime: number
+) {
+  const now = Date.now();
+  const pandaIndex = characters.findIndex((c) => c.id === 'panda');
+  if (pandaIndex === -1 || !startTimeRef.current) return;
+
+  const lastUsed = pandaSkillTimeRef.current;
+  const canUse =
+    now - startTimeRef.current >= 3000 &&
+    (!lastUsed || now - lastUsed >= cooltime);
+
+  if (!canUse) return;
+
+  // 앞에 있는 캐릭터 찾기
+  const pandaAngle = angleRef.current[pandaIndex];
+  let closestIndex: number | null = null;
+  let closestDiff = Infinity;
+
+  characters.forEach((_, i) => {
+    if (i === pandaIndex) return;
+    const diff = angleRef.current[i] - pandaAngle;
+    if (diff > 0 && diff < closestDiff) {
+      closestDiff = diff;
+      closestIndex = i;
+    }
+  });
+
+  if (closestIndex !== null && closestDiff < 50) {
+    // 💢 이펙트
+    effectSetter(pandaIndex, 'panda');
+    effectSetter(closestIndex, 'panda-hit');
+
+    // 타격 처리: 밀기 + 정지
+    angleRef.current[closestIndex] -= 20;
+    pausedRef.current[closestIndex] = true;
+    setPausedList([...pausedRef.current]);
+
+    setTimeout(() => {
+      pausedRef.current[closestIndex!] = false;
+      setPausedList([...pausedRef.current]);
+      effectSetter(closestIndex!, '');
+    }, 500);
+
+    setTimeout(() => {
+      effectSetter(pandaIndex, '');
+    }, 1500);
+
+    pandaSkillTimeRef.current = now;
+  }
 }

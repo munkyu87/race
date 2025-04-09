@@ -8,4 +8,5 @@ export const defaultSettings: GameSettings = {
   dogSkillCooltime: 7000,
   foxSkillCooltime: 9000,
   foxTrapDuration: 2000,
+  pandaSkillCooltime: 5000,
 };
