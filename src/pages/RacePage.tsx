@@ -31,6 +31,8 @@ export default function RacePage() {
 
   const [angleList, setAngleList] = useState<number[]>(characters.map(() => 0));
   const [lapList, setLapList] = useState<number[]>(characters.map(() => 0));
+  const [lapMessage, setLapMessage] = useState<string | null>(null);
+  const prevLapList = useRef<number[]>([...lapList]);
   const [finishedList, setFinishedList] = useState<boolean[]>(
     characters.map(() => false)
   );
@@ -43,6 +45,7 @@ export default function RacePage() {
     characters.map(() => false)
   );
   const [triggerHorseEffect, setTriggerHorseEffect] = useState(false);
+  const [showRanking, setShowRanking] = useState(false);
   const [foxTargetIndex, setFoxTargetIndex] = useState<number | null>(null);
 
   const lapRef = useRef([...lapList]);
@@ -65,6 +68,16 @@ export default function RacePage() {
   const trapsRef = useRef<Trap[]>([]);
   const { settings } = settingsStore;
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [isFinalLap, setIsFinalLap] = useState(false);
+
+  useEffect(() => {
+    const leader = getLeaderIndex();
+    if (lapList[leader] === totalLaps - 1) {
+      setIsFinalLap(true);
+    } else {
+      setIsFinalLap(false);
+    }
+  }, [lapList]);
 
   useEffect(() => {
     if (countdown === null) return;
@@ -84,6 +97,41 @@ export default function RacePage() {
   useEffect(() => {
     if (!storedPlayers) navigate('/');
   }, []);
+
+  const getLeaderIndex = () => {
+    let maxLap = Math.max(...lapList);
+    let maxAngle = -1;
+    let leaderIndex = -1;
+    angleList.forEach((angle, i) => {
+      if (lapList[i] === maxLap && angle > maxAngle) {
+        maxAngle = angle;
+        leaderIndex = i;
+      }
+    });
+    return leaderIndex;
+  };
+
+  useEffect(() => {
+    const leader = getLeaderIndex();
+
+    lapList.forEach((lap, i) => {
+      const prevLap = prevLapList.current[i];
+
+      if (i === leader && lap !== prevLap) {
+        if (lap === totalLaps - 1) {
+          // 마지막 바퀴 진입
+          setLapMessage(`🚨 마지막 바퀴!`);
+        } else if (lap < totalLaps - 1) {
+          // 일반 바퀴
+          setLapMessage(`🏁 ${lap + 1}바퀴째!`);
+        }
+
+        setTimeout(() => setLapMessage(null), 2000);
+      }
+    });
+
+    prevLapList.current = [...lapList];
+  }, [lapList]);
 
   useEffect(() => {
     if (triggerHorseEffect) {
@@ -106,7 +154,14 @@ export default function RacePage() {
     }
   }, [triggerHorseEffect]);
 
+  const clearAllTimeouts = () => {
+    let id = window.setTimeout(() => {}, 0);
+    while (id--) window.clearTimeout(id);
+  };
+
   const resetRace = () => {
+    clearAllTimeouts();
+
     const initialAngles = characters.map(() => 0);
     const initialLaps = characters.map(() => 0);
     const initialFinished = characters.map(() => false);
@@ -123,6 +178,10 @@ export default function RacePage() {
     setTriggerHorseEffect(false);
     setCountdown(null);
     setFoxTargetIndex(null);
+    setIsFinalLap(false);
+    setLapMessage(null);
+
+    setShowRanking(false);
 
     angleRef.current = [...initialAngles];
     lapRef.current = [...initialLaps];
@@ -130,16 +189,19 @@ export default function RacePage() {
     rankingRef.current = [];
     pausedRef.current = [...initialPaused];
     bonusRef.current = [...initialBonus];
+    prevLapList.current = [...initialLaps];
 
     lastBoostRef.current = Date.now();
+    startTimeRef.current = Date.now();
+
     catSkillTimeRef.current = null;
     pigSkillTimeRef.current = null;
     dogSkillTimeRef.current = null;
     foxSkillTimeRef.current = null;
     pandaSkillTimeRef.current = null;
+
     trapsRef.current = [];
     dogSkillStateRef.current = { phase: 'idle', lastUsed: null };
-    startTimeRef.current = Date.now();
   };
 
   const startRace = () => {
@@ -260,6 +322,8 @@ export default function RacePage() {
               name: characters[i].name,
               time: now - startTimeRef.current,
             });
+
+            setShowRanking(true);
           }
         });
 
@@ -434,6 +498,9 @@ export default function RacePage() {
           🎯 총 바퀴 수: {totalLaps}바퀴
         </div>
         <div className="oval-track">
+          <div className="start-line">
+            {isFinalLap && <div className="goal-text">🏁 GOAL</div>}
+          </div>
           {trapsRef.current
             .filter((t) => !t.used)
             .map((trap, i) => {
@@ -492,6 +559,24 @@ export default function RacePage() {
                     💢
                   </div>
                 )}
+                {lapMessage && (
+                  <motion.div
+                    key={lapMessage}
+                    className="countdown-text"
+                    initial={{ scale: 2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6 }}
+                    style={{
+                      color: '#fff',
+                      textShadow: '0 0 8px #000',
+                      fontSize: '2.4rem',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {lapMessage}
+                  </motion.div>
+                )}
                 {/* 캐릭터 */}
                 <motion.img
                   src={char.image}
@@ -508,7 +593,7 @@ export default function RacePage() {
                         ? '0 0 25px 10px rgba(128,0,255,0.5)'
                         : 'none',
                   }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.4 }}
                   style={{ position: 'absolute', borderRadius: '50%' }}
                 />
               </React.Fragment>
@@ -517,20 +602,22 @@ export default function RacePage() {
         </div>
       </div>
 
-      <div className="ranking-board">
-        <div>🏆 순위</div>
-        {ranking.map((r, idx) => {
-          const char = characters.find((c) => c.id === r.id);
-          if (!char) return null;
-          return (
-            <div key={r.id} className="ranking-item">
-              <span>{idx + 1}등</span>
-              <img src={char.image} alt={char.name} />
-              <span>{char.name}</span>
-            </div>
-          );
-        })}
-      </div>
+      {showRanking && (
+        <div className="ranking-board">
+          <div>🏆 순위</div>
+          {ranking.map((r, idx) => {
+            const char = characters.find((c) => c.id === r.id);
+            if (!char) return null;
+            return (
+              <div key={r.id} className="ranking-item">
+                <span>{idx + 1}등</span>
+                <img src={char.image} alt={char.name} />
+                <span>{char.name}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

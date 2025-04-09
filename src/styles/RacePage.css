@@ -51,6 +51,7 @@
 }
 
 .character-img {
+  z-index: 30;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -250,29 +251,6 @@ button {
   font-weight: 500;
 }
 
-/* .race-players {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 0.5rem;
-} */
-
-/* .race-player {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-} */
-
-/* .race-player img {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 1px solid #ccc;
-} */
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -281,15 +259,41 @@ button {
   background: black;
   color: white;
 }
-/* 
-.back-button {
-  background: yellow;
-  padding: 0.5rem 1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 1rem;
-  cursor: pointer;
-} */
+
+.start-line {
+  position: absolute;
+  width: 330px;
+  height: 55px;
+  background: linear-gradient(to right, transparent, red, transparent);
+  top: 310px;
+  left: 82.5%;
+  transform: translateX(-50%);
+  z-index: 10;
+  opacity: 0.7;
+}
+
+.goal-text {
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: black;
+  text-shadow: 0 0 8px white;
+  animation: goalPulse 1s ease-in-out infinite;
+}
+
+@keyframes goalPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 
 .title {
   font-size: 2rem;
@@ -480,5 +484,38 @@ button {
   50% {
     opacity: 0.3;
     transform: scale(1.1);
+  }
+}
+
+.lap-indicator {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: -20px;
+  left: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  white-space: nowrap;
+  z-index: 12;
+  animation: fadeInOut 2s ease-in-out forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -80%);
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%);
   }
 }
