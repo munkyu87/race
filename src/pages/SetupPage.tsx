@@ -11,6 +11,7 @@ import {
 import SettingsIcon from '@mui/icons-material/Settings';
 import '../styles/SetupPage.css';
 import { observer } from 'mobx-react-lite';
+import SkillSettingsPanel from '../components/SkillSettingsPanel';
 
 import cat from '../assets/characters/cat.png';
 import dog from '../assets/characters/dog.png';
@@ -18,7 +19,6 @@ import fox from '../assets/characters/fox.png';
 import horse from '../assets/characters/horse.png';
 import panda from '../assets/characters/panda.png';
 import pig from '../assets/characters/pig.png';
-import { settingsStore } from '../stores/settingsStore';
 
 const characterList = [
   { id: 'cat', image: cat, defaultName: '고양이' },
@@ -74,86 +74,9 @@ function SetupPage() {
       </IconButton>
 
       <Dialog open={openSettings} onClose={() => setOpenSettings(false)}>
-        <DialogTitle>스킬 쿨타임 설정</DialogTitle>
+        <DialogTitle>스킬 설정</DialogTitle>
         <DialogContent>
-          <Typography gutterBottom>
-            🐴 말: {settingsStore.settings.horseSkillCooltime / 1000}s
-          </Typography>
-          <Slider
-            value={settingsStore.settings.horseSkillCooltime / 1000}
-            onChange={(e, val) =>
-              settingsStore.updateSetting(
-                'horseSkillCooltime',
-                (val as number) * 1000
-              )
-            }
-            min={3}
-            max={20}
-            step={1}
-            valueLabelDisplay="auto"
-          />
-
-          <Typography gutterBottom>
-            🐱 고양이: {settingsStore.settings.catSkillCooltime / 1000}s
-          </Typography>
-          <Slider
-            value={settingsStore.settings.catSkillCooltime / 1000}
-            onChange={(e, val) =>
-              settingsStore.updateSetting(
-                'catSkillCooltime',
-                (val as number) * 1000
-              )
-            }
-            min={3}
-            max={20}
-            valueLabelDisplay="auto"
-          />
-
-          <Typography gutterBottom>
-            🐷 돼지: {settingsStore.settings.pigSkillCooltime / 1000}s
-          </Typography>
-          <Slider
-            value={settingsStore.settings.pigSkillCooltime / 1000}
-            onChange={(e, val) =>
-              settingsStore.updateSetting(
-                'pigSkillCooltime',
-                (val as number) * 1000
-              )
-            }
-            min={3}
-            max={20}
-            valueLabelDisplay="auto"
-          />
-          <Typography gutterBottom>
-            🐶 강아지: {settingsStore.settings.dogSkillCooltime / 1000}s
-          </Typography>
-          <Slider
-            value={settingsStore.settings.dogSkillCooltime / 1000}
-            onChange={(e, val) =>
-              settingsStore.updateSetting(
-                'dogSkillCooltime',
-                (val as number) * 1000
-              )
-            }
-            min={3}
-            max={20}
-            valueLabelDisplay="auto"
-          />
-          <Typography gutterBottom>
-            🦊 여우: {settingsStore.settings.foxSkillCooltime / 1000}s
-          </Typography>
-          <Slider
-            value={settingsStore.settings.foxSkillCooltime / 1000}
-            onChange={(e, val) =>
-              settingsStore.updateSetting(
-                'foxSkillCooltime',
-                (val as number) * 1000
-              )
-            }
-            min={3}
-            max={20}
-            valueLabelDisplay="auto"
-          />
+          <SkillSettingsPanel />
         </DialogContent>
       </Dialog>
 

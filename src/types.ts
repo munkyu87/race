@@ -14,11 +14,20 @@ export type EffectType = '' | 'cat' | 'horse' | 'pig' | 'dog' | 'fox' | 'panda';
 
 export interface GameSettings {
   horseSkillCooltime: number;
+  horseBoostAmount: number;
+
   catSkillCooltime: number;
+  catSpeedBonus: number;
+
   pigSkillCooltime: number;
   pigPauseDuration: number;
+
   dogSkillCooltime: number;
+  dogBoostSpeed: number;
+
   foxSkillCooltime: number;
-  foxTrapDuration: number;
+  foxReverseDistance: number;
+
   pandaSkillCooltime: number;
+  pandaStunDuration: number;
 }

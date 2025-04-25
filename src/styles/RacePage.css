@@ -317,9 +317,31 @@ button {
 /* 고양이 스킬 효과 */
 .effect-cat {
   box-shadow: 0 0 15px 6px gold;
-  animation: glow-cat 1s ease-in-out infinite alternate;
+  animation-name: cat-slip, glow-cat;
+  animation-duration: 1s, 1s;
+  animation-timing-function: ease-in-out, ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-direction: normal, alternate;
+  transform: scale(0.5);
 }
 
+@keyframes cat-slip {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  30% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 @keyframes glow-cat {
   from {
     box-shadow: 0 0 5px gold;
@@ -346,18 +368,16 @@ button {
 
 /* 돼지 스킬 효과 */
 .character-img.effect-pig {
-  box-shadow: 0 0 10px 4px pink;
+  box-shadow: 0 0 15px 6px hotpink;
   animation: pigGlow 1s ease-in-out infinite alternate;
 }
 
 @keyframes pigGlow {
   from {
-    transform: scale(1);
-    filter: brightness(1);
+    box-shadow: 0 0 5px hotpink;
   }
   to {
-    transform: scale(1.05);
-    filter: brightness(1.5);
+    box-shadow: 0 0 15px 6px hotpink;
   }
 }
 

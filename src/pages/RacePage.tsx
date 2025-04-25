@@ -221,7 +221,8 @@ export default function RacePage() {
           bonusRef,
           lastBoostRef,
           () => setTriggerHorseEffect(true),
-          settings.horseSkillCooltime
+          settings.horseSkillCooltime,
+          settings.horseBoostAmount
         );
         usePigSkill(
           characters,
@@ -244,6 +245,7 @@ export default function RacePage() {
           pigSkillTimeRef,
           startTimeRef,
           settings.pigSkillCooltime,
+          settings.pigPauseDuration,
           dogSkillStateRef
         );
 
@@ -268,11 +270,12 @@ export default function RacePage() {
                 updated[index] = '';
                 return updated;
               });
-            }, settings.dogSkillCooltime);
+            }, settings.dogSkillCooltime * 1000);
           },
           dogSkillStateRef,
           startTimeRef,
-          settings.dogSkillCooltime
+          settings.dogSkillCooltime,
+          settings.dogBoostSpeed
         );
 
         useFoxSkill(
@@ -289,7 +292,8 @@ export default function RacePage() {
             });
             setFoxTargetIndex(index);
           },
-          settings.foxSkillCooltime
+          settings.foxSkillCooltime,
+          settings.foxReverseDistance
         );
 
         usePandaSkill(
@@ -306,7 +310,8 @@ export default function RacePage() {
           },
           pandaSkillTimeRef,
           startTimeRef,
-          settings.pandaSkillCooltime
+          settings.pandaSkillCooltime,
+          settings.pandaStunDuration
         );
 
         newAngles.forEach((angle, i) => {
@@ -347,7 +352,8 @@ export default function RacePage() {
           },
           catSkillTimeRef,
           startTimeRef,
-          settings.catSkillCooltime
+          settings.catSkillCooltime,
+          settings.catSpeedBonus
         );
 
         finishedRef.current = newFinished;
@@ -362,6 +368,7 @@ export default function RacePage() {
         if (newFinished.every(Boolean)) {
           clearInterval(interval);
           setRacing(false);
+          dogSkillStateRef.current = { phase: 'idle', lastUsed: null };
         }
 
         return newAngles;

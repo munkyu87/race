@@ -21,8 +21,10 @@ export function useCatSkill(
   effectSetter: (index: number, type: string) => void,
   skillTimeRef: React.MutableRefObject<number | null>,
   startTimeRef: RefObject<number>,
-  catSkillCooltime: number
+  catSkillCooltime: number,
+  catSpeedBonus: number
 ) {
+  catSkillCooltime = catSkillCooltime * 1000;
   const catIndex = characters.findIndex((c) => c.id === 'cat');
   const now = Date.now();
   const lastUsed = skillTimeRef.current;
@@ -58,6 +60,8 @@ export function useCatSkill(
       angleList[catIndex] = angleList[target.index];
       angleList[target.index] = temp;
 
+      angleList[catIndex] += catSpeedBonus;
+
       effectSetter(catIndex, 'cat');
       skillTimeRef.current = now;
     }
@@ -70,8 +74,10 @@ export function useHorseSkill(
   bonusRef: RefObject<number[]>,
   lastBoostRef: MutableRefObject<number>,
   effectTrigger: () => void,
-  horseSkillCooltime: number
+  horseSkillCooltime: number,
+  horseBoostAmount: number
 ) {
+  horseSkillCooltime = horseSkillCooltime * 1000;
   const horseIndex = characters.findIndex((c) => c.id === 'horse');
   const now = Date.now();
 
@@ -81,7 +87,8 @@ export function useHorseSkill(
     now - lastBoostRef.current >= horseSkillCooltime &&
     bonusRef.current
   ) {
-    bonusRef.current[horseIndex] += 0.2;
+    // bonusRef.current[horseIndex] += 0.2;
+    bonusRef.current[horseIndex] += horseBoostAmount;
     lastBoostRef.current = now;
     effectTrigger();
   }
@@ -96,11 +103,14 @@ export function usePigSkill(
   pigSkillTimeRef: MutableRefObject<number | null>,
   startTimeRef: RefObject<number>,
   pigSkillCooltime: number,
+  pigPauseDuration: number,
   dogSkillStateRef: MutableRefObject<{
     phase: 'idle' | 'charging' | 'boosting';
     lastUsed: number | null;
   }>
 ) {
+  pigSkillCooltime = pigSkillCooltime * 1000;
+  pigPauseDuration = pigPauseDuration * 1000;
   const pigIndex = characters.findIndex((c) => c.id === 'pig');
   const dogIndex = characters.findIndex((c) => c.id === 'dog');
   const now = Date.now();
@@ -114,6 +124,8 @@ export function usePigSkill(
     (!lastUsed || now - lastUsed >= pigSkillCooltime);
 
   if (canUse) {
+    // effectSetter(pigIndex, 'pig');
+
     const paused = characters.map((_, i) => i !== pigIndex);
 
     pausedRef.current = paused;
@@ -129,7 +141,10 @@ export function usePigSkill(
 
       pausedRef.current = resumed;
       setPausedList(resumed);
-    }, 1000);
+
+      // pigSkillTimeRef.current = Date.now();
+      // }, 1000);
+    }, pigPauseDuration);
 
     effectSetter(pigIndex, 'pig');
     pigSkillTimeRef.current = now;
@@ -144,8 +159,11 @@ export function useDogSkill(
   effectSetter: (index: number, type: string) => void,
   dogSkillStateRef: React.MutableRefObject<DogSkillState>,
   startTimeRef: RefObject<number>,
-  dogSkillCooltime: number
+  dogSkillCooltime: number,
+  dogBoostSpeed: number
 ) {
+  if (true) return; // 일시적 스킬 사용 안함. 버그이슈
+  dogSkillCooltime = dogSkillCooltime * 1000;
   const dogIndex = characters.findIndex((c) => c.id === 'dog');
   if (dogIndex === -1 || !startTimeRef.current) return;
 
@@ -160,6 +178,10 @@ export function useDogSkill(
     // 1단계: 멈춤
     const paused = [...pausedRef.current];
     paused[dogIndex] = true;
+    // const paused = characters.map((_, i) => i === dogIndex); // dogIndex만 true
+    // const paused = [...pausedRef.current];
+    // paused[dogIndex] = true;
+
     pausedRef.current = paused;
     setPausedList([...paused]);
     effectSetter(dogIndex, 'charge');
@@ -171,12 +193,14 @@ export function useDogSkill(
       setPausedList([...paused]);
 
       bonusRef.current![dogIndex] += 4;
+      // bonusRef.current![dogIndex] += dogBoostSpeed;
       state.phase = 'boosting';
       effectSetter(dogIndex, 'dog');
 
       // 3단계: m초 후 보너스 원상복구 + 상태 초기화
       setTimeout(() => {
         bonusRef.current![dogIndex] -= 4;
+        // bonusRef.current![dogIndex] -= dogBoostSpeed;
         state.phase = 'idle';
       }, 8000);
     }, dogSkillCooltime);
@@ -190,14 +214,16 @@ export function useFoxSkill(
   foxSkillTimeRef: React.MutableRefObject<number | null>,
   startTimeRef: React.MutableRefObject<number>,
   effectSetter: (index: number, type: string) => void,
-  cooltime: number
+  cooltime: number,
+  foxReverseDistance: number
 ) {
+  cooltime = cooltime * 1000;
   const now = Date.now();
   const foxIndex = characters.findIndex((c) => c.id === 'fox');
-  const dogIndex = characters.findIndex((c) => c.id === 'dog');
+  // const dogIndex = characters.findIndex((c) => c.id === 'dog');
 
   if (foxIndex === -1 || !startTimeRef.current) return;
-  if (dogIndex === -1 || !startTimeRef.current) return;
+  // if (dogIndex === -1 || !startTimeRef.current) return;
 
   const lastUsed = foxSkillTimeRef.current;
   const canUse =
@@ -211,18 +237,21 @@ export function useFoxSkill(
       index: i,
       angle: angleRef.current[i],
     }))
-    .filter((c) => c.index !== foxIndex && c.index !== dogIndex)
+    .filter((c) => c.index !== foxIndex)
+    // .filter((c) => c.index !== foxIndex && c.index !== dogIndex)
     .sort((a, b) => b.angle - a.angle);
 
   const target = sorted[0];
   if (!target) return;
 
   const idx = target.index;
-  bonusRef.current[idx] -= 2;
+  // bonusRef.current[idx] -= 2;
+  bonusRef.current[idx] -= foxReverseDistance;
   effectSetter(idx, 'foxreverse');
 
   setTimeout(() => {
-    bonusRef.current[idx] += 2;
+    // bonusRef.current[idx] += 2;
+    bonusRef.current[idx] += foxReverseDistance;
     effectSetter(idx, '');
   }, 2000);
 
@@ -237,8 +266,11 @@ export function usePandaSkill(
   effectSetter: (index: number, type: string) => void,
   pandaSkillTimeRef: React.MutableRefObject<number | null>,
   startTimeRef: React.MutableRefObject<number>,
-  cooltime: number
+  cooltime: number,
+  pandaStunDuration: number
 ) {
+  cooltime = cooltime * 1000;
+  pandaStunDuration = pandaStunDuration * 1000;
   const now = Date.now();
   const pandaIndex = characters.findIndex((c) => c.id === 'panda');
   if (pandaIndex === -1 || !startTimeRef.current) return;
@@ -265,7 +297,6 @@ export function usePandaSkill(
   });
 
   if (closestIndex !== null && closestDiff < 50) {
-    // 💢 이펙트
     effectSetter(pandaIndex, 'panda');
     effectSetter(closestIndex, 'panda-hit');
 
@@ -278,12 +309,12 @@ export function usePandaSkill(
       pausedRef.current[closestIndex!] = false;
       setPausedList([...pausedRef.current]);
       effectSetter(closestIndex!, '');
-    }, 500);
+      // }, 500);
+    }, pandaStunDuration);
 
     setTimeout(() => {
       effectSetter(pandaIndex, '');
+      pandaSkillTimeRef.current = Date.now();
     }, 1500);
-
-    pandaSkillTimeRef.current = now;
   }
 }
