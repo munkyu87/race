@@ -351,6 +351,22 @@ button {
   }
 }
 
+.effect-dog-food {
+  animation: speed-boost 0.5s infinite alternate;
+  box-shadow: 0 0 12px 6px rgba(255, 215, 0, 0.6);
+}
+@keyframes dog-food-blink {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.4);
+  }
+}
+
 /* 말 스킬 효과 */
 .effect-horse {
   box-shadow: 0 0 15px 6px dodgerblue;
@@ -404,7 +420,7 @@ button {
 }
 
 /* 질주 중 */
-.effect-dog {
+/* .effect-dog {
   animation: dog-speed-blur 0.3s infinite linear;
   filter: contrast(1.5) hue-rotate(-20deg);
 }
@@ -446,7 +462,7 @@ button {
   background-color: orange;
   border-radius: 50%;
   box-shadow: 0 0 8px orange;
-}
+} */
 
 @keyframes blink {
   0%,

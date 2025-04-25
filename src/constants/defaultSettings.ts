@@ -5,17 +5,17 @@ export const defaultSettings: GameSettings = {
   horseBoostAmount: 0.2,
 
   catSkillCooltime: 6,
-  catSpeedBonus: 20,
+  catSpeedBonus: 10,
 
   pigSkillCooltime: 15,
   pigPauseDuration: 1.5,
 
   dogSkillCooltime: 7,
-  dogBoostSpeed: 4,
+  dogBoostDuration: 2,
 
-  foxSkillCooltime: 7,
+  foxSkillCooltime: 6,
   foxReverseDistance: 4,
 
-  pandaSkillCooltime: 7,
+  pandaSkillCooltime: 6,
   pandaStunDuration: 2,
 };

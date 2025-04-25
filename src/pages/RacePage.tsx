@@ -15,6 +15,9 @@ import {
   useDogSkill,
   Trap,
   usePandaSkill,
+  FoodItem,
+  FoodType,
+  types,
 } from '../skills/skillManager';
 import { settingsStore } from '../stores/settingsStore';
 import { useFoxSkill } from '../skills/skillManager';
@@ -46,7 +49,6 @@ export default function RacePage() {
   );
   const [triggerHorseEffect, setTriggerHorseEffect] = useState(false);
   const [showRanking, setShowRanking] = useState(false);
-  const [foxTargetIndex, setFoxTargetIndex] = useState<number | null>(null);
 
   const lapRef = useRef([...lapList]);
   const finishedRef = useRef([...finishedList]);
@@ -59,16 +61,14 @@ export default function RacePage() {
   const pigSkillTimeRef = useRef<number | null>(null);
   const dogSkillTimeRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
-  const dogSkillStateRef = useRef<{
-    phase: 'idle' | 'charging' | 'boosting';
-    lastUsed: number | null;
-  }>({ phase: 'idle', lastUsed: null });
   const foxSkillTimeRef = useRef<number | null>(null);
   const pandaSkillTimeRef = useRef<number | null>(null);
   const trapsRef = useRef<Trap[]>([]);
   const { settings } = settingsStore;
   const [countdown, setCountdown] = useState<number | null>(null);
   const [isFinalLap, setIsFinalLap] = useState(false);
+
+  const foodRef = useRef<FoodItem[]>([]);
 
   useEffect(() => {
     const leader = getLeaderIndex();
@@ -78,6 +78,36 @@ export default function RacePage() {
       setIsFinalLap(false);
     }
   }, [lapList]);
+
+  useEffect(() => {
+    if (!racing) return;
+
+    const interval = setInterval(() => {
+      const type = types[Math.floor(Math.random() * types.length)] as FoodType;
+
+      const bonusMap: Record<FoodType, number> = {
+        carrot: 1,
+        bone: 2,
+        meat: 3,
+      };
+
+      const now = Date.now();
+
+      const food: FoodItem = {
+        id: Date.now().toString(),
+        angle: Math.random() * 360,
+        type,
+        bonus: bonusMap[type],
+        duration: settings.dogBoostDuration * 1000,
+        eaten: false,
+        activeAt: now + 1000, // 생성 후 1초 후 부터 먹을 수 있도록
+      };
+
+      foodRef.current.push(food);
+    }, settings.dogSkillCooltime * 1000);
+
+    return () => clearInterval(interval);
+  }, [racing, settings.dogSkillCooltime, settings.dogBoostDuration]);
 
   useEffect(() => {
     if (countdown === null) return;
@@ -93,10 +123,6 @@ export default function RacePage() {
       return () => clearTimeout(timer);
     }
   }, [countdown]);
-
-  useEffect(() => {
-    if (!storedPlayers) navigate('/');
-  }, []);
 
   const getLeaderIndex = () => {
     let maxLap = Math.max(...lapList);
@@ -177,11 +203,12 @@ export default function RacePage() {
     setPausedList(initialPaused);
     setTriggerHorseEffect(false);
     setCountdown(null);
-    setFoxTargetIndex(null);
     setIsFinalLap(false);
     setLapMessage(null);
 
     setShowRanking(false);
+
+    foodRef.current = [];
 
     angleRef.current = [...initialAngles];
     lapRef.current = [...initialLaps];
@@ -201,7 +228,6 @@ export default function RacePage() {
     pandaSkillTimeRef.current = null;
 
     trapsRef.current = [];
-    dogSkillStateRef.current = { phase: 'idle', lastUsed: null };
   };
 
   const startRace = () => {
@@ -245,38 +271,16 @@ export default function RacePage() {
           pigSkillTimeRef,
           startTimeRef,
           settings.pigSkillCooltime,
-          settings.pigPauseDuration,
-          dogSkillStateRef
+          settings.pigPauseDuration
         );
 
-        useDogSkill(
-          characters,
-          bonusRef,
-          pausedRef,
-          setPausedList,
-          (index, type) => {
-            setEffectList((prev) => {
-              const updated = [...prev];
-              updated[index] =
-                type === 'dog' && dogSkillStateRef.current.phase === 'boosting'
-                  ? 'dog-boost'
-                  : type;
-              return updated;
-            });
-
-            setTimeout(() => {
-              setEffectList((prev) => {
-                const updated = [...prev];
-                updated[index] = '';
-                return updated;
-              });
-            }, settings.dogSkillCooltime * 1000);
-          },
-          dogSkillStateRef,
-          startTimeRef,
-          settings.dogSkillCooltime,
-          settings.dogBoostSpeed
-        );
+        useDogSkill(characters, angleRef, foodRef, bonusRef, (index, type) => {
+          setEffectList((prev) => {
+            const updated = [...prev];
+            updated[index] = type;
+            return updated;
+          });
+        });
 
         useFoxSkill(
           characters,
@@ -290,7 +294,7 @@ export default function RacePage() {
               updated[index] = type;
               return updated;
             });
-            setFoxTargetIndex(index);
+            // setFoxTargetIndex(index);
           },
           settings.foxSkillCooltime,
           settings.foxReverseDistance
@@ -368,7 +372,7 @@ export default function RacePage() {
         if (newFinished.every(Boolean)) {
           clearInterval(interval);
           setRacing(false);
-          dogSkillStateRef.current = { phase: 'idle', lastUsed: null };
+          // dogSkillStateRef.current = { phase: 'idle', lastUsed: null };
         }
 
         return newAngles;
@@ -528,6 +532,35 @@ export default function RacePage() {
                 />
               );
             })}
+          {foodRef.current
+            .filter((f) => !f.eaten)
+            .map((food) => {
+              const rad = (food.angle * Math.PI) / 180;
+              const x = 570 + 380 * Math.cos(rad);
+              const y = 300 + 220 * Math.sin(rad);
+              const foodIcon = {
+                carrot: '🥕',
+                bone: '🦴',
+                meat: '🍖',
+              }[food.type];
+
+              return (
+                <div
+                  key={food.id}
+                  style={{
+                    position: 'absolute',
+                    left: x,
+                    top: y,
+                    transform: 'translate(-50%, -50%)',
+                    fontSize: '28px',
+                    zIndex: 9,
+                    animation: 'float 1.5s ease-in-out infinite',
+                  }}
+                >
+                  {foodIcon}
+                </div>
+              );
+            })}
           {characters.map((char, i) => {
             const pos = getXY(angleList[i], i);
             const effect = effectList[i];
@@ -583,6 +616,23 @@ export default function RacePage() {
                   >
                     {lapMessage}
                   </motion.div>
+                )}
+                {effect === 'dog-food' && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: pos.x + 5,
+                      top: pos.y - 50,
+                      fontSize: '36px',
+                      fontWeight: 'bold',
+                      color: '#FFD700', // 진한 노란색
+                      textShadow: '0 0 10px #FFD700, 0 0 20px #FFA500', // 빛나는 느낌
+                      zIndex: 12,
+                      animation: 'dog-food-blink 1s ease-in-out infinite',
+                    }}
+                  >
+                    ⚡
+                  </div>
                 )}
                 {/* 캐릭터 */}
                 <motion.img

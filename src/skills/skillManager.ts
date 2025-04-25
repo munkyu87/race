@@ -13,6 +13,19 @@ export interface Trap {
   ownerId: string;
 }
 
+export const types: readonly FoodType[] = ['carrot', 'bone', 'meat'];
+export type FoodType = 'carrot' | 'bone' | 'meat';
+
+export type FoodItem = {
+  id: string;
+  angle: number; // 위치
+  type: FoodType;
+  bonus: number;
+  duration: number;
+  eaten: boolean;
+  activeAt: number;
+};
+
 // 고양이 스킬 (앞지르기)
 export function useCatSkill(
   characters: Character[],
@@ -103,11 +116,11 @@ export function usePigSkill(
   pigSkillTimeRef: MutableRefObject<number | null>,
   startTimeRef: RefObject<number>,
   pigSkillCooltime: number,
-  pigPauseDuration: number,
-  dogSkillStateRef: MutableRefObject<{
-    phase: 'idle' | 'charging' | 'boosting';
-    lastUsed: number | null;
-  }>
+  pigPauseDuration: number
+  // dogSkillStateRef: MutableRefObject<{
+  //   phase: 'idle' | 'charging' | 'boosting';
+  //   lastUsed: number | null;
+  // }>
 ) {
   pigSkillCooltime = pigSkillCooltime * 1000;
   pigPauseDuration = pigPauseDuration * 1000;
@@ -132,12 +145,7 @@ export function usePigSkill(
     setPausedList(paused);
 
     setTimeout(() => {
-      const resumed = characters.map((_, i) => {
-        if (i === dogIndex && dogSkillStateRef.current.phase === 'charging') {
-          return true;
-        }
-        return false;
-      });
+      const resumed = characters.map(() => false);
 
       pausedRef.current = resumed;
       setPausedList(resumed);
@@ -153,57 +161,33 @@ export function usePigSkill(
 
 export function useDogSkill(
   characters: Character[],
-  bonusRef: RefObject<number[]>,
-  pausedRef: React.MutableRefObject<boolean[]>,
-  setPausedList: (list: boolean[]) => void,
-  effectSetter: (index: number, type: string) => void,
-  dogSkillStateRef: React.MutableRefObject<DogSkillState>,
-  startTimeRef: RefObject<number>,
-  dogSkillCooltime: number,
-  dogBoostSpeed: number
+  angleRef: React.MutableRefObject<number[]>,
+  foodRef: React.MutableRefObject<FoodItem[]>,
+  bonusRef: React.MutableRefObject<number[]>,
+  effectSetter: (index: number, type: string) => void
 ) {
-  if (true) return; // 일시적 스킬 사용 안함. 버그이슈
-  dogSkillCooltime = dogSkillCooltime * 1000;
   const dogIndex = characters.findIndex((c) => c.id === 'dog');
-  if (dogIndex === -1 || !startTimeRef.current) return;
+  if (dogIndex === -1) return;
 
+  const dogAngle = angleRef.current[dogIndex] % 360;
   const now = Date.now();
-  const state = dogSkillStateRef.current;
 
-  const canUse = state.phase === 'idle';
-  if (canUse) {
-    state.phase = 'charging';
-    state.lastUsed = now;
+  for (const food of foodRef.current) {
+    if (food.eaten || now < food.activeAt) continue;
 
-    // 1단계: 멈춤
-    const paused = [...pausedRef.current];
-    paused[dogIndex] = true;
-    // const paused = characters.map((_, i) => i === dogIndex); // dogIndex만 true
-    // const paused = [...pausedRef.current];
-    // paused[dogIndex] = true;
+    const diff = Math.abs(food.angle - dogAngle);
+    const angleDiff = Math.min(diff, 360 - diff);
 
-    pausedRef.current = paused;
-    setPausedList([...paused]);
-    effectSetter(dogIndex, 'charge');
+    if (angleDiff < 10) {
+      food.eaten = true;
+      bonusRef.current[dogIndex] += food.bonus;
+      effectSetter(dogIndex, 'dog-food');
 
-    // 2단계: n초 후 질주 시작
-    setTimeout(() => {
-      paused[dogIndex] = false;
-      pausedRef.current = paused;
-      setPausedList([...paused]);
-
-      bonusRef.current![dogIndex] += 4;
-      // bonusRef.current![dogIndex] += dogBoostSpeed;
-      state.phase = 'boosting';
-      effectSetter(dogIndex, 'dog');
-
-      // 3단계: m초 후 보너스 원상복구 + 상태 초기화
       setTimeout(() => {
-        bonusRef.current![dogIndex] -= 4;
-        // bonusRef.current![dogIndex] -= dogBoostSpeed;
-        state.phase = 'idle';
-      }, 8000);
-    }, dogSkillCooltime);
+        bonusRef.current[dogIndex] -= food.bonus;
+        effectSetter(dogIndex, '');
+      }, food.duration);
+    }
   }
 }
 

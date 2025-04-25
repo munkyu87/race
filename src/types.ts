@@ -23,7 +23,7 @@ export interface GameSettings {
   pigPauseDuration: number;
 
   dogSkillCooltime: number;
-  dogBoostSpeed: number;
+  dogBoostDuration: number;
 
   foxSkillCooltime: number;
   foxReverseDistance: number;
