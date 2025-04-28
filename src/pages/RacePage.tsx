@@ -635,6 +635,8 @@ export default function RacePage() {
             const pos = getXY(angleList[i], i);
             const effect = effectList[i];
             const fox = characters.find((c) => c.id === 'fox');
+            const isFlipped = angleList[i] % 360 > 180; // 180도 넘어가면 반전
+
             return (
               <React.Fragment key={char.id}>
                 {/* 여우 스킬 이펙트: 여우 얼굴 아이콘 */}
@@ -719,9 +721,14 @@ export default function RacePage() {
                       effect === 'panda'
                         ? '0 0 25px 10px rgba(128,0,255,0.5)'
                         : 'none',
+                    scaleX: isFlipped ? 1 : -1,
                   }}
                   transition={{ duration: 0.4 }}
-                  style={{ position: 'absolute', borderRadius: '50%' }}
+                  style={{
+                    position: 'absolute',
+                    borderRadius: '50%',
+                    transform: isFlipped ? 'scaleX(1)' : 'scaleX(-1)',
+                  }}
                 />
               </React.Fragment>
             );

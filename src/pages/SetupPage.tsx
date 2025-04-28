@@ -7,6 +7,7 @@ import {
   IconButton,
   Slider,
   Typography,
+  DialogActions,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import '../styles/SetupPage.css';
@@ -36,6 +37,44 @@ function SetupPage() {
   const [lapCount, setLapCount] = useState<number>(3);
   const [openSettings, setOpenSettings] = useState(false);
   const navigate = useNavigate();
+  const [openSkillDialog, setOpenSkillDialog] = useState(false);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(
+    null
+  );
+
+  const handleOpenSkillDialog = (id: string) => {
+    setSelectedCharacterId(id);
+    setOpenSkillDialog(true);
+  };
+
+  const handleCloseSkillDialog = () => {
+    setOpenSkillDialog(false);
+  };
+
+  const selectedCharacter = characterList.find(
+    (c) => c.id === selectedCharacterId
+  );
+
+  const getSkillDescription = (id: string | null) => {
+    if (!id) return '';
+    switch (id) {
+      case 'cat':
+        return '앞에 있는 상대를 당겨오며 순간 속도 상승!';
+      case 'dog':
+        return `트랙에 등장하는 먹이를 먹으면 순간 속도 상승!\n
+  🥕 당근 = +1\n🦴 뼈다귀 = +2\n🍖 고기 = +3`;
+      case 'fox':
+        return '가장 앞에 있는 상대를 잠시 후진시킴!';
+      case 'horse':
+        return '조금씩 속도 상승!';
+      case 'panda':
+        return '주변상대를 잠시 멈춤!';
+      case 'pig':
+        return '자신제외 전부 잠시 멈춤!';
+      default:
+        return '';
+    }
+  };
 
   const handleNameChange = (idx: number, value: string) => {
     const updated = [...names];
@@ -83,8 +122,12 @@ function SetupPage() {
       <div className="character-grid">
         {characterList.map((char, idx) => (
           <div key={idx} className="character-card">
-            <div className="character-slot" key={idx}>
-              <img src={char.image} alt={char.defaultName} />
+            <div className="character-slot">
+              <img
+                src={char.image}
+                alt={char.defaultName}
+                onClick={() => handleOpenSkillDialog(char.id)}
+              />
               <input
                 type="text"
                 placeholder={char.defaultName}
@@ -108,6 +151,52 @@ function SetupPage() {
       <button className="start-button" onClick={handleStart}>
         레이스 시작!
       </button>
+      <Dialog open={openSkillDialog} onClose={handleCloseSkillDialog}>
+        <DialogTitle style={{ textAlign: 'center' }}>
+          {selectedCharacter?.defaultName}
+        </DialogTitle>
+        <DialogContent style={{ textAlign: 'center', width: '350px' }}>
+          <img
+            src={selectedCharacter?.image}
+            alt={selectedCharacter?.defaultName}
+            style={{
+              width: '120px',
+              height: '120px',
+              marginBottom: '1rem',
+              borderRadius: '50%',
+            }}
+          />
+          {getSkillDescription(selectedCharacterId)
+            .split('\n')
+            .map((line, idx) => (
+              <Typography
+                key={idx}
+                variant="body1"
+                align="center"
+                style={{ marginTop: idx === 0 ? 0 : 8 }}
+              >
+                {line}
+              </Typography>
+            ))}
+        </DialogContent>
+
+        <DialogActions style={{ justifyContent: 'center' }}>
+          <button
+            style={{
+              backgroundColor: '#4caf50',
+              color: 'white',
+              border: 'none',
+              marginBottom: '5px',
+              borderRadius: '20px',
+              fontSize: '1rem',
+              cursor: 'pointer',
+            }}
+            onClick={handleCloseSkillDialog}
+          >
+            닫기
+          </button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
