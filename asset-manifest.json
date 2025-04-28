@@ -1,8 +1,9 @@
 {
   "files": {
     "main.css": "/race/static/css/main.1b295ada.css",
-    "main.js": "/race/static/js/main.1372cab2.js",
+    "main.js": "/race/static/js/main.2667e935.js",
     "static/media/race_bg.png": "/race/static/media/race_bg.9aa2473096db6babda1d.png",
+    "static/media/roulette.png": "/race/static/media/roulette.115367108d5b83756323.png",
     "static/media/horse.png": "/race/static/media/horse.1889aeff8fb44edcc04b.png",
     "static/media/fox.png": "/race/static/media/fox.64f41577551c907e7137.png",
     "static/media/cat.png": "/race/static/media/cat.067ba59c7406b8a5d012.png",
@@ -11,10 +12,10 @@
     "static/media/dog.png": "/race/static/media/dog.26e5d3735848753320fd.png",
     "index.html": "/race/index.html",
     "main.1b295ada.css.map": "/race/static/css/main.1b295ada.css.map",
-    "main.1372cab2.js.map": "/race/static/js/main.1372cab2.js.map"
+    "main.2667e935.js.map": "/race/static/js/main.2667e935.js.map"
   },
   "entrypoints": [
     "static/css/main.1b295ada.css",
-    "static/js/main.1372cab2.js"
+    "static/js/main.2667e935.js"
   ]
 }
