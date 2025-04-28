@@ -22,6 +22,8 @@ import {
 import { settingsStore } from '../stores/settingsStore';
 import { useFoxSkill } from '../skills/skillManager';
 
+import roulette from '../assets/images/roulette.png';
+
 export default function RacePage() {
   const navigate = useNavigate();
   const storedPlayers = localStorage.getItem('players');
@@ -67,6 +69,7 @@ export default function RacePage() {
   const { settings } = settingsStore;
   const [countdown, setCountdown] = useState<number | null>(null);
   const [isFinalLap, setIsFinalLap] = useState(false);
+  const [spinning, setSpinning] = useState(false);
 
   const foodRef = useRef<FoodItem[]>([]);
 
@@ -372,7 +375,6 @@ export default function RacePage() {
         if (newFinished.every(Boolean)) {
           clearInterval(interval);
           setRacing(false);
-          // dogSkillStateRef.current = { phase: 'idle', lastUsed: null };
         }
 
         return newAngles;
@@ -391,6 +393,38 @@ export default function RacePage() {
       x: centerX + a * Math.cos(rad) + xOffset,
       y: centerY + b * Math.sin(rad) + 10,
     };
+  };
+
+  const handleRandomize = () => {
+    if (spinning) return;
+    setSpinning(true);
+
+    setTimeout(() => {
+      // 1. 캐릭터(동물)만 랜덤으로 섞기
+      const shuffledCharacters = [...characters].sort(
+        () => Math.random() - 0.5
+      );
+
+      // 2. 이름만 따로 뽑아서 랜덤 섞기
+      const names = characters.map((c) => c.name);
+      const shuffledNames = [...names].sort(() => Math.random() - 0.5);
+
+      // 3. 캐릭터와 이름을 새로 매칭
+      const randomizedCharacters = shuffledCharacters.map((char, idx) => ({
+        ...char,
+        name: shuffledNames[idx], // 이름 새로 매칭
+      }));
+
+      // 4. 저장
+      localStorage.setItem('players', JSON.stringify(randomizedCharacters));
+
+      // 5. 랜덤 바퀴수
+      const randomLaps = Math.floor(Math.random() * 9) + 2;
+      localStorage.setItem('laps', randomLaps.toString());
+
+      resetRace();
+      window.location.reload();
+    }, 1000);
   };
 
   if (characters.length === 0) {
@@ -464,35 +498,71 @@ export default function RacePage() {
             </motion.div>
           )}
           {!racing && countdown === null && (
-            <Button
-              variant="outlined"
-              onClick={() => {
-                resetRace();
-                setCountdown(3);
-              }}
-              startIcon={<PlayArrowIcon />}
-              sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                color: 'white',
-                border: '2px solid white',
-                borderRadius: '50px',
-                marginLeft: '0.1rem',
-                marginBottom: '0.5rem',
-                padding: '0.8rem 0.9rem',
-                fontWeight: 'bold',
-                fontSize: '1.2rem',
-                letterSpacing: '1px',
-                boxShadow: '0 0 12px rgba(255,255,255,0.3)',
-                transition: 'all 0.3s ease-in-out',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.3)',
-                  transform: 'scale(1.05)',
-                  boxShadow: '0 0 20px rgba(255,255,255,0.5)',
-                },
-              }}
-            >
-              START
-            </Button>
+            <>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  resetRace();
+                  setCountdown(3);
+                }}
+                startIcon={<PlayArrowIcon />}
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  color: 'white',
+                  border: '2px solid white',
+                  borderRadius: '50px',
+                  marginLeft: '0.1rem',
+                  marginBottom: '0.5rem',
+                  padding: '0.8rem 0.9rem',
+                  fontWeight: 'bold',
+                  fontSize: '1.2rem',
+                  letterSpacing: '1px',
+                  boxShadow: '0 0 12px rgba(255,255,255,0.3)',
+                  transition: 'all 0.3s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.3)',
+                    transform: 'scale(1.05)',
+                    boxShadow: '0 0 20px rgba(255,255,255,0.5)',
+                  },
+                }}
+              >
+                START
+              </Button>
+              <div
+                style={{
+                  position: 'absolute',
+                  // top: 'calc(20% + 80px)',
+                  top: '-300%',
+                  left: '20%',
+                  // transform: 'translateX(-50%)',
+                  zIndex: 9,
+                }}
+              >
+                <motion.div
+                  animate={spinning ? { rotate: 360 } : {}}
+                  // transition={{ duration: 1, ease: 'easeInOut' }}
+                  transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+                  onClick={handleRandomize}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img
+                    src={roulette}
+                    onClick={handleRandomize}
+                    style={{
+                      // backgroundColor: 'rgba(255,255,255,0.2)',
+                      // border: '2px solid white',
+                      borderRadius: '50%',
+                      width: 80,
+                      height: 80,
+                      minWidth: 0,
+                      padding: 0,
+                      fontSize: '1.5rem',
+                      fontWeight: 'bold',
+                    }}
+                  />
+                </motion.div>
+              </div>
+            </>
           )}
         </div>
 
