@@ -423,7 +423,8 @@ export default function RacePage() {
       localStorage.setItem('laps', randomLaps.toString());
 
       resetRace();
-      window.location.reload();
+      setSpinning(false);
+      // window.location.reload();
     }, 1000);
   };
 
@@ -547,7 +548,8 @@ export default function RacePage() {
                 >
                   <img
                     src={roulette}
-                    onClick={handleRandomize}
+                    alt="룰렛"
+                    // onClick={handleRandomize}
                     style={{
                       // backgroundColor: 'rgba(255,255,255,0.2)',
                       // border: '2px solid white',
