@@ -14,7 +14,7 @@ import {
   usePigSkill,
   useDogSkill,
   Trap,
-  usePandaSkill,
+  useCrocodileSkill,
   FoodItem,
   FoodType,
   types,
@@ -64,7 +64,7 @@ export default function RacePage() {
   const dogSkillTimeRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
   const foxSkillTimeRef = useRef<number | null>(null);
-  const pandaSkillTimeRef = useRef<number | null>(null);
+  const crocodileSkillTimeRef = useRef<number | null>(null);
   const trapsRef = useRef<Trap[]>([]);
   const { settings } = settingsStore;
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -84,6 +84,9 @@ export default function RacePage() {
 
   useEffect(() => {
     if (!racing) return;
+
+    const hasDog = characters.some((char) => char.id === 'dog');
+    if (!hasDog) return;
 
     const interval = setInterval(() => {
       const type = types[Math.floor(Math.random() * types.length)] as FoodType;
@@ -165,6 +168,7 @@ export default function RacePage() {
   useEffect(() => {
     if (triggerHorseEffect) {
       const horseIndex = characters.findIndex((c) => c.id === 'horse');
+
       if (horseIndex !== -1) {
         setEffectList((prev) => {
           const updated = [...prev];
@@ -228,7 +232,7 @@ export default function RacePage() {
     pigSkillTimeRef.current = null;
     dogSkillTimeRef.current = null;
     foxSkillTimeRef.current = null;
-    pandaSkillTimeRef.current = null;
+    crocodileSkillTimeRef.current = null;
 
     trapsRef.current = [];
   };
@@ -251,7 +255,8 @@ export default function RacePage() {
           lastBoostRef,
           () => setTriggerHorseEffect(true),
           settings.horseSkillCooltime,
-          settings.horseBoostAmount
+          settings.horseBoostAmount,
+          finishedRef.current
         );
         usePigSkill(
           characters,
@@ -274,7 +279,8 @@ export default function RacePage() {
           pigSkillTimeRef,
           startTimeRef,
           settings.pigSkillCooltime,
-          settings.pigPauseDuration
+          settings.pigPauseDuration,
+          finishedRef.current
         );
 
         useDogSkill(characters, angleRef, foodRef, bonusRef, (index, type) => {
@@ -300,10 +306,11 @@ export default function RacePage() {
             // setFoxTargetIndex(index);
           },
           settings.foxSkillCooltime,
-          settings.foxReverseDistance
+          settings.foxReverseDistance,
+          finishedRef.current
         );
 
-        usePandaSkill(
+        useCrocodileSkill(
           characters,
           angleRef,
           pausedRef,
@@ -315,10 +322,11 @@ export default function RacePage() {
               return updated;
             });
           },
-          pandaSkillTimeRef,
+          crocodileSkillTimeRef,
           startTimeRef,
-          settings.pandaSkillCooltime,
-          settings.pandaStunDuration
+          settings.crocodileSkillCooltime,
+          settings.crocodileStunDuration,
+          finishedRef.current
         );
 
         newAngles.forEach((angle, i) => {
@@ -360,7 +368,8 @@ export default function RacePage() {
           catSkillTimeRef,
           startTimeRef,
           settings.catSkillCooltime,
-          settings.catSpeedBonus
+          settings.catSpeedBonus,
+          finishedRef.current
         );
 
         finishedRef.current = newFinished;
@@ -383,12 +392,12 @@ export default function RacePage() {
   };
 
   const getXY = (angle: number, index: number) => {
-    const a = 380,
+    const a = 390,
       b = 220,
-      centerX = 570,
-      centerY = 300;
+      centerX = 565,
+      centerY = 295;
     const rad = (angle * Math.PI) / 180;
-    const xOffset = (index - (characters.length - 1) / 2) * 35;
+    const xOffset = (index - (characters.length - 1) / 2) * 45;
     return {
       x: centerX + a * Math.cos(rad) + xOffset,
       y: centerY + b * Math.sin(rad) + 10,
@@ -657,7 +666,7 @@ export default function RacePage() {
                     }}
                   />
                 )}
-                {effect === 'panda-hit' && (
+                {effect === 'crocodile-hit' && (
                   <div
                     style={{
                       position: 'absolute',
@@ -718,10 +727,10 @@ export default function RacePage() {
                   animate={{
                     left: pos.x,
                     top: pos.y,
-                    scale: effect === 'panda' ? 1.3 : 1, // 팬더 크기 변화
+                    scale: effect === 'crocodile' ? 1.3 : 1, // 악어 크기 변화
                     boxShadow:
-                      effect === 'panda'
-                        ? '0 0 25px 10px rgba(128,0,255,0.5)'
+                      effect === 'crocodile'
+                        ? '0 0 25px 10px rgba(144, 238, 144, 0.7)'
                         : 'none',
                     scaleX: isFlipped ? 1 : -1,
                   }}

@@ -52,10 +52,8 @@
 
 .character-img {
   z-index: 30;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 2px solid black;
+  width: 65px;
+  height: 65px;
   position: absolute;
 }
 
@@ -127,7 +125,7 @@
 .race-player {
   display: flex;
   align-items: center;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   padding: 0.25rem 0.4rem;
   color: white;
@@ -489,11 +487,11 @@ button {
   }
 }
 
-.effect-panda-hit {
-  animation: pandaHitShake 0.5s ease-in-out;
+.effect-crocodile-hit {
+  animation: crocodileHitShake 0.5s ease-in-out;
 }
 
-@keyframes pandaHitShake {
+@keyframes crocodileHitShake {
   0% {
     transform: translateX(0px);
   }

@@ -120,11 +120,11 @@ const SkillSettingsPanel = () => {
         1
       )}
       {renderDualSlider(
-        '판다',
-        '🐼',
-        'pandaSkillCooltime',
+        '악어',
+        '🐊',
+        'crocodileSkillCooltime',
         '스킬 쿨타임',
-        'pandaStunDuration',
+        'crocodileStunDuration',
         '기절 시간',
         3,
         20,

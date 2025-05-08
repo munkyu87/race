@@ -35,13 +35,15 @@ export function useCatSkill(
   skillTimeRef: React.MutableRefObject<number | null>,
   startTimeRef: RefObject<number>,
   catSkillCooltime: number,
-  catSpeedBonus: number
+  catSpeedBonus: number,
+  finishedList: boolean[]
 ) {
   catSkillCooltime = catSkillCooltime * 1000;
   const catIndex = characters.findIndex((c) => c.id === 'cat');
   const now = Date.now();
   const lastUsed = skillTimeRef.current;
-  if (!startTimeRef.current) return;
+  if (!startTimeRef.current || catIndex === -1 || finishedList[catIndex])
+    return;
   const elapsed = now - startTimeRef.current;
 
   const lapList = lapRef.current;
@@ -60,6 +62,7 @@ export function useCatSkill(
         lap: lapRef.current![i],
         angle: angleList[i],
       }))
+      .filter((e) => !finishedList[e.index])
       .sort((a, b) => b.lap - a.lap || b.angle - a.angle);
 
     const myRank = sorted.findIndex((e) => e.index === catIndex);
@@ -88,12 +91,14 @@ export function useHorseSkill(
   lastBoostRef: MutableRefObject<number>,
   effectTrigger: () => void,
   horseSkillCooltime: number,
-  horseBoostAmount: number
+  horseBoostAmount: number,
+  finishedList: boolean[]
 ) {
   horseSkillCooltime = horseSkillCooltime * 1000;
   const horseIndex = characters.findIndex((c) => c.id === 'horse');
   const now = Date.now();
 
+  if (finishedList[horseIndex]) return;
   if (
     horseIndex !== -1 &&
     lastBoostRef.current !== null &&
@@ -116,16 +121,14 @@ export function usePigSkill(
   pigSkillTimeRef: MutableRefObject<number | null>,
   startTimeRef: RefObject<number>,
   pigSkillCooltime: number,
-  pigPauseDuration: number
-  // dogSkillStateRef: MutableRefObject<{
-  //   phase: 'idle' | 'charging' | 'boosting';
-  //   lastUsed: number | null;
-  // }>
+  pigPauseDuration: number,
+  finishedList: boolean[]
 ) {
   pigSkillCooltime = pigSkillCooltime * 1000;
   pigPauseDuration = pigPauseDuration * 1000;
   const pigIndex = characters.findIndex((c) => c.id === 'pig');
-  const dogIndex = characters.findIndex((c) => c.id === 'dog');
+
+  if (finishedList[pigIndex]) return;
   const now = Date.now();
   if (!startTimeRef.current) return;
   const elapsed = now - startTimeRef.current;
@@ -137,8 +140,6 @@ export function usePigSkill(
     (!lastUsed || now - lastUsed >= pigSkillCooltime);
 
   if (canUse) {
-    // effectSetter(pigIndex, 'pig');
-
     const paused = characters.map((_, i) => i !== pigIndex);
 
     pausedRef.current = paused;
@@ -149,9 +150,6 @@ export function usePigSkill(
 
       pausedRef.current = resumed;
       setPausedList(resumed);
-
-      // pigSkillTimeRef.current = Date.now();
-      // }, 1000);
     }, pigPauseDuration);
 
     effectSetter(pigIndex, 'pig');
@@ -199,15 +197,15 @@ export function useFoxSkill(
   startTimeRef: React.MutableRefObject<number>,
   effectSetter: (index: number, type: string) => void,
   cooltime: number,
-  foxReverseDistance: number
+  foxReverseDistance: number,
+  finishedList: boolean[]
 ) {
   cooltime = cooltime * 1000;
   const now = Date.now();
   const foxIndex = characters.findIndex((c) => c.id === 'fox');
-  // const dogIndex = characters.findIndex((c) => c.id === 'dog');
 
-  if (foxIndex === -1 || !startTimeRef.current) return;
-  // if (dogIndex === -1 || !startTimeRef.current) return;
+  if (foxIndex === -1 || finishedList[foxIndex] || !startTimeRef.current)
+    return;
 
   const lastUsed = foxSkillTimeRef.current;
   const canUse =
@@ -221,8 +219,7 @@ export function useFoxSkill(
       index: i,
       angle: angleRef.current[i],
     }))
-    .filter((c) => c.index !== foxIndex)
-    // .filter((c) => c.index !== foxIndex && c.index !== dogIndex)
+    .filter((c) => c.index !== foxIndex && !finishedList[c.index])
     .sort((a, b) => b.angle - a.angle);
 
   const target = sorted[0];
@@ -242,24 +239,26 @@ export function useFoxSkill(
   foxSkillTimeRef.current = now;
 }
 
-export function usePandaSkill(
+export function useCrocodileSkill(
   characters: Character[],
   angleRef: React.MutableRefObject<number[]>,
   pausedRef: React.MutableRefObject<boolean[]>,
   setPausedList: (list: boolean[]) => void,
   effectSetter: (index: number, type: string) => void,
-  pandaSkillTimeRef: React.MutableRefObject<number | null>,
+  crocodileSkillTimeRef: React.MutableRefObject<number | null>,
   startTimeRef: React.MutableRefObject<number>,
   cooltime: number,
-  pandaStunDuration: number
+  crocodileStunDuration: number,
+  finishedList: boolean[]
 ) {
   cooltime = cooltime * 1000;
-  pandaStunDuration = pandaStunDuration * 1000;
+  crocodileStunDuration = crocodileStunDuration * 1000;
   const now = Date.now();
-  const pandaIndex = characters.findIndex((c) => c.id === 'panda');
-  if (pandaIndex === -1 || !startTimeRef.current) return;
+  const crocodileIndex = characters.findIndex((c) => c.id === 'crocodile');
+  if (crocodileIndex === -1 || finishedList[crocodileIndex] || !startTimeRef.current)
+    return;
 
-  const lastUsed = pandaSkillTimeRef.current;
+  const lastUsed = crocodileSkillTimeRef.current;
   const canUse =
     now - startTimeRef.current >= 3000 &&
     (!lastUsed || now - lastUsed >= cooltime);
@@ -267,13 +266,13 @@ export function usePandaSkill(
   if (!canUse) return;
 
   // 앞에 있는 캐릭터 찾기
-  const pandaAngle = angleRef.current[pandaIndex];
+  const crocodileAngle = angleRef.current[crocodileIndex];
   let closestIndex: number | null = null;
   let closestDiff = Infinity;
 
   characters.forEach((_, i) => {
-    if (i === pandaIndex) return;
-    const diff = angleRef.current[i] - pandaAngle;
+    if (i === crocodileIndex) return;
+    const diff = angleRef.current[i] - crocodileAngle;
     if (diff > 0 && diff < closestDiff) {
       closestDiff = diff;
       closestIndex = i;
@@ -281,8 +280,8 @@ export function usePandaSkill(
   });
 
   if (closestIndex !== null && closestDiff < 50) {
-    effectSetter(pandaIndex, 'panda');
-    effectSetter(closestIndex, 'panda-hit');
+    effectSetter(crocodileIndex, 'crocodile');
+    effectSetter(closestIndex, 'crocodile-hit');
 
     // 타격 처리: 밀기 + 정지
     angleRef.current[closestIndex] -= 20;
@@ -294,11 +293,11 @@ export function usePandaSkill(
       setPausedList([...pausedRef.current]);
       effectSetter(closestIndex!, '');
       // }, 500);
-    }, pandaStunDuration);
+    }, crocodileStunDuration);
 
     setTimeout(() => {
-      effectSetter(pandaIndex, '');
-      pandaSkillTimeRef.current = Date.now();
+      effectSetter(crocodileIndex, '');
+      crocodileSkillTimeRef.current = Date.now();
     }, 1500);
   }
 }

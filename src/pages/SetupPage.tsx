@@ -18,7 +18,7 @@ import cat from '../assets/characters/cat.png';
 import dog from '../assets/characters/dog.png';
 import fox from '../assets/characters/fox.png';
 import horse from '../assets/characters/horse.png';
-import panda from '../assets/characters/panda.png';
+import crocodile from '../assets/characters/crocodile.png';
 import pig from '../assets/characters/pig.png';
 
 const characterList = [
@@ -26,7 +26,7 @@ const characterList = [
   { id: 'dog', image: dog, defaultName: '강아지' },
   { id: 'fox', image: fox, defaultName: '여우' },
   { id: 'horse', image: horse, defaultName: '말' },
-  { id: 'panda', image: panda, defaultName: '팬더' },
+  { id: 'crocodile', image: crocodile, defaultName: '악어' },
   { id: 'pig', image: pig, defaultName: '돼지' },
 ];
 
@@ -67,7 +67,7 @@ function SetupPage() {
         return '가장 앞에 있는 상대를 잠시 속도감소!';
       case 'horse':
         return '조금씩 속도 상승!';
-      case 'panda':
+      case 'crocodile':
         return '주변상대를 잠시 멈춤!';
       case 'pig':
         return '자신제외 전부 잠시 멈춤!';
@@ -103,8 +103,30 @@ function SetupPage() {
 
   return (
     <div className="setup-container">
-      <h1>🏁 동물 쇼트트랙 🏁</h1>
-
+      <span
+        style={{
+          fontSize: '2.4rem',
+          color: 'white',
+          textShadow: '0 0 5px #ffd700',
+        }}
+      >
+        🐾 빙글빙글 동물 레이스 🐾
+      </span>
+      {/* <h1
+        style={{
+          fontFamily: 'inherit',
+          fontSize: '2rem',
+          fontWeight: 'bold',
+          color: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.3rem',
+        }}
+      >
+        <span style={{ filter: 'drop-shadow(0 0 4px #7af087)' }}>🐾</span>
+        빙글빙글 동물 레이스
+        <span style={{ filter: 'drop-shadow(0 0 4px #7af087)' }}>🐾</span>
+      </h1> */}
       <IconButton
         style={{ position: 'absolute', color: 'white', top: 16, right: 16 }}
         onClick={() => setOpenSettings(true)}

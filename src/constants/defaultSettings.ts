@@ -16,6 +16,6 @@ export const defaultSettings: GameSettings = {
   foxSkillCooltime: 6,
   foxReverseDistance: 4,
 
-  pandaSkillCooltime: 6,
-  pandaStunDuration: 2,
+  crocodileSkillCooltime: 6,
+  crocodileStunDuration: 2,
 };
