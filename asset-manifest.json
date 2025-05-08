@@ -1,21 +1,21 @@
 {
   "files": {
-    "main.css": "/race/static/css/main.1b295ada.css",
-    "main.js": "/race/static/js/main.1caa01f6.js",
+    "main.css": "/race/static/css/main.58c40725.css",
+    "main.js": "/race/static/js/main.735a733d.js",
     "static/media/race_bg.png": "/race/static/media/race_bg.9aa2473096db6babda1d.png",
     "static/media/roulette.png": "/race/static/media/roulette.115367108d5b83756323.png",
-    "static/media/fox.png": "/race/static/media/fox.25e23b931892074ba01b.png",
-    "static/media/horse.png": "/race/static/media/horse.dab3bc49096c55e04822.png",
-    "static/media/cat.png": "/race/static/media/cat.af72e2e31b48b5a5d484.png",
-    "static/media/pig.png": "/race/static/media/pig.a2399c991b414b198ae4.png",
-    "static/media/dog.png": "/race/static/media/dog.e1328cd601b800c73409.png",
-    "static/media/panda.png": "/race/static/media/panda.e7f89b250e300cfe178d.png",
+    "static/media/cat.png": "/race/static/media/cat.090197423687b39f36e1.png",
+    "static/media/pig.png": "/race/static/media/pig.c81ac9492ff168a0db3e.png",
+    "static/media/crocodile.png": "/race/static/media/crocodile.c1c9259b722a9564c197.png",
+    "static/media/horse.png": "/race/static/media/horse.0e1065799fe745980193.png",
+    "static/media/dog.png": "/race/static/media/dog.09abaa82f5e9e8ea57b4.png",
+    "static/media/fox.png": "/race/static/media/fox.52005203b9e671bc40de.png",
     "index.html": "/race/index.html",
-    "main.1b295ada.css.map": "/race/static/css/main.1b295ada.css.map",
-    "main.1caa01f6.js.map": "/race/static/js/main.1caa01f6.js.map"
+    "main.58c40725.css.map": "/race/static/css/main.58c40725.css.map",
+    "main.735a733d.js.map": "/race/static/js/main.735a733d.js.map"
   },
   "entrypoints": [
-    "static/css/main.1b295ada.css",
-    "static/js/main.1caa01f6.js"
+    "static/css/main.58c40725.css",
+    "static/js/main.735a733d.js"
   ]
 }
