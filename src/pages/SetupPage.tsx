@@ -9,6 +9,8 @@ import {
   Typography,
   DialogActions,
   Button,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import '../styles/SetupPage.css';
@@ -23,7 +25,7 @@ import crocodile from '../assets/characters/crocodile.png';
 import pig from '../assets/characters/pig.png';
 import { settingsStore } from '../stores/settingsStore';
 
-const characterList = [
+export const characterList = [
   { id: 'cat', image: cat, defaultName: '고양이' },
   { id: 'dog', image: dog, defaultName: '강아지' },
   { id: 'fox', image: fox, defaultName: '여우' },
@@ -85,21 +87,32 @@ function SetupPage() {
   };
 
   const handleStart = () => {
-    const players = characterList
-      .map((char, idx) => ({
-        id: char.id,
-        name: names[idx].trim(),
-        image: char.image,
-      }))
-      .filter((p) => p.name !== '');
+    localStorage.removeItem('players');
+    const players = settingsStore.settings.allJoin
+      ? characterList.map((char, idx) => ({
+          id: char.id,
+          name: names[idx].trim() || char.defaultName,
+          image: char.image,
+        }))
+      : characterList
+          .map((char, idx) => ({
+            id: char.id,
+            name: names[idx].trim(),
+            image: char.image,
+          }))
+          .filter((p) => p.name !== '');
 
-    if (players.length < 2) {
+    if (!settingsStore.settings.allJoin && players.length < 2) {
       alert('참가자는 최소 2명 이상이어야 합니다.');
       return;
     }
 
     localStorage.setItem('players', JSON.stringify(players));
     localStorage.setItem('laps', lapCount.toString());
+    localStorage.setItem(
+      'allJoin',
+      JSON.stringify(settingsStore.settings.allJoin)
+    );
     navigate('/race-play');
   };
 
@@ -128,10 +141,23 @@ function SetupPage() {
           <div
             style={{
               display: 'flex',
-              justifyContent: 'flex-end',
-              marginTop: '1rem',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: '1.5rem',
             }}
           >
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={settingsStore.settings.allJoin}
+                  onChange={(e) =>
+                    settingsStore.updateSetting('allJoin', e.target.checked)
+                  }
+                />
+              }
+              label="모든 캐릭터 자동 참가"
+            />
+
             <Button
               variant="contained"
               color="primary"

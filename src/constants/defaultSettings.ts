@@ -18,4 +18,6 @@ export const defaultSettings: GameSettings = {
 
   crocodileSkillCooltime: 6,
   crocodileStunDuration: 2,
+
+  allJoin: true,
 };

@@ -23,6 +23,7 @@ import { settingsStore } from '../stores/settingsStore';
 import { useFoxSkill } from '../skills/skillManager';
 
 import roulette from '../assets/images/roulette.png';
+import { characterList } from './SetupPage';
 
 export default function RacePage() {
   const navigate = useNavigate();
@@ -777,6 +778,41 @@ export default function RacePage() {
               </div>
             );
           })}
+
+          {/* <div style={{ marginTop: 20 }}> */}
+          <a
+            href="https://buymeacoffee.com/munstar77p"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#e6d3b3',
+              color: '#000',
+              marginTop: 20,
+              borderRadius: '30px',
+              padding: '14px 20px',
+              textDecoration: 'none',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+              transition: 'transform 0.2s',
+              textAlign: 'center',
+              lineHeight: 1.5,
+              fontFamily: 'Noto Sans KR, sans-serif',
+            }}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.transform = 'scale(1.05)')
+            }
+            onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            <div style={{ fontSize: '1rem', fontWeight: 600 }}>
+              재밌게 즐기셨다면?
+            </div>
+            <div
+              style={{ fontSize: '1.2rem', fontWeight: 900, color: 'brown' }}
+            >
+              ☕ 커피 한 잔~
+            </div>
+          </a>
+          {/* </div> */}
         </div>
       )}
     </div>

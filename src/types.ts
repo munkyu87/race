@@ -10,7 +10,14 @@ export interface RankingItem {
   time: number;
 }
 
-export type EffectType = '' | 'cat' | 'horse' | 'pig' | 'dog' | 'fox' | 'crocodile';
+export type EffectType =
+  | ''
+  | 'cat'
+  | 'horse'
+  | 'pig'
+  | 'dog'
+  | 'fox'
+  | 'crocodile';
 
 export interface GameSettings {
   horseSkillCooltime: number;
@@ -30,4 +37,6 @@ export interface GameSettings {
 
   crocodileSkillCooltime: number;
   crocodileStunDuration: number;
+
+  allJoin: boolean;
 }
