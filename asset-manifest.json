@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/race/static/css/main.58c40725.css",
-    "main.js": "/race/static/js/main.735a733d.js",
+    "main.css": "/race/static/css/main.bf641ade.css",
+    "main.js": "/race/static/js/main.61c28bc5.js",
     "static/media/race_bg.png": "/race/static/media/race_bg.9aa2473096db6babda1d.png",
     "static/media/roulette.png": "/race/static/media/roulette.115367108d5b83756323.png",
     "static/media/cat.png": "/race/static/media/cat.090197423687b39f36e1.png",
@@ -11,11 +11,11 @@
     "static/media/dog.png": "/race/static/media/dog.09abaa82f5e9e8ea57b4.png",
     "static/media/fox.png": "/race/static/media/fox.52005203b9e671bc40de.png",
     "index.html": "/race/index.html",
-    "main.58c40725.css.map": "/race/static/css/main.58c40725.css.map",
-    "main.735a733d.js.map": "/race/static/js/main.735a733d.js.map"
+    "main.bf641ade.css.map": "/race/static/css/main.bf641ade.css.map",
+    "main.61c28bc5.js.map": "/race/static/js/main.61c28bc5.js.map"
   },
   "entrypoints": [
-    "static/css/main.58c40725.css",
-    "static/js/main.735a733d.js"
+    "static/css/main.bf641ade.css",
+    "static/js/main.61c28bc5.js"
   ]
 }
