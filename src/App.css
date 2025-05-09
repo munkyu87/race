@@ -1,7 +1,8 @@
 body {
   background-color: black;
   color: white;
-  font-family: sans-serif;
+  /* font-family: sans-serif; */
+  font-family: 'Noto Sans KR', sans-serif;
 }
 
 .setup-screen {

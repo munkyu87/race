@@ -71,27 +71,53 @@
 } */
 
 .start-button {
-  background: linear-gradient(to bottom, #fff176, #fdd835);
-  box-shadow: 0 6px 0 #c2a900, 0 0 15px rgba(255, 235, 59, 0.5);
-  border-radius: 50px;
+  background: linear-gradient(to bottom, #fff9c4, #fbc02d);
+  /* background: linear-gradient(to bottom, #fff9c4, #ffe082); */
+  color: black;
+  border: 2px solid #fbc02d;
+  border-radius: 30px;
+  padding: 0.8rem 2rem;
+  font-weight: 700;
+  font-size: 1.2rem;
+  /* font-family: 'GmarketSans', sans-serif; */
+  letter-spacing: 0.5px;
+  /* box-shadow: 0 4px 8px rgba(255, 213, 0, 0.3); */
+  /* box-shadow: 0 2px 6px rgba(255, 204, 0, 0.4); */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.start-button:hover {
+  transform: scale(1.04);
+  /* box-shadow: 0 6px 12px rgba(255, 213, 0, 0.4); */
+  /* box-shadow: 0 2px 6px rgba(255, 204, 0, 0.4); */
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); */
+}
+
+.start-button:active {
+  transform: scale(0.96);
+}
+/* .start-button {
+  background: linear-gradient(to bottom, #fff9c4, #ffe082);
   color: #4a4a4a;
-  padding: 0.8rem 2.2rem;
-  border: none;
-  font-weight: 800;
-  font-size: 1.3rem;
+  border: 2px solid #fdd835;
+  border-radius: 40px;
+  padding: 0.8rem 2rem;
+  font-weight: 700;
+  font-size: 1.2rem;
   font-family: 'GmarketSans', 'DungGeunMo', sans-serif;
   letter-spacing: 1px;
-  cursor: pointer;
+  box-shadow: 0 0 12px rgba(255, 229, 100, 0.6);
   transition: all 0.2s ease-in-out;
-  position: relative;
+  cursor: pointer;
 }
 
 .start-button:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 0 #c2a900, 0 0 20px rgba(255, 235, 59, 0.8);
+  box-shadow: 0 0 18px rgba(255, 235, 59, 0.8);
 }
 
 .start-button:active {
   transform: scale(0.95);
-  top: 2px;
-}
+} */

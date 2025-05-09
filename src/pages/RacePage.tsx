@@ -468,28 +468,44 @@ export default function RacePage() {
         >
           세팅으로
         </Button>
-        <div className="race-title-wrap">
-          <div className="race-title">🏁 레이스 스타트 🏁</div>
-        </div>
-        <div style={{ width: '172px' }}></div>
       </div>
 
-      <div className="race-players">
-        {characters.map((char, i) => (
-          <div className="race-player" key={char.id}>
-            <img src={char.image} alt={char.name} />
-            <span style={{ marginLeft: '5px' }}>{char.name}</span>
-          </div>
-        ))}
-      </div>
       <div className="oval-track-wrapper">
+        <div
+          className="controls"
+          style={{
+            position: 'absolute',
+            top: '4.3%',
+            left: '50%',
+            transform: 'translate(-50%, -53%)',
+            zIndex: 10,
+          }}
+        >
+          <div className="race-title">
+            <motion.div
+              initial={{ opacity: 0, y: -25 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              🚗 빙글빙글 동물 레이스 🚕
+            </motion.div>
+          </div>
+          <div className="race-players">
+            {characters.map((char, i) => (
+              <div className="race-player" key={char.id}>
+                <img src={char.image} alt={char.name} />
+                <span style={{ marginLeft: '5px' }}>{char.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
         <div
           className="controls"
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%)',
+            transform: 'translate(-50%, -52%)',
             zIndex: 10,
           }}
         >
@@ -582,7 +598,7 @@ export default function RacePage() {
             position: 'absolute',
             top: '32.5%',
             left: '50%',
-            transform: 'translate(-50%, -50%)',
+            transform: 'translate(-50%, -52%)',
             zIndex: 10,
             fontWeight: 700,
           }}
@@ -704,9 +720,9 @@ export default function RacePage() {
                   <div
                     style={{
                       position: 'absolute',
-                      left: pos.x + 5,
-                      top: pos.y - 50,
-                      fontSize: '36px',
+                      left: pos.x + 2,
+                      top: pos.y - 30,
+                      fontSize: '35px',
                       fontWeight: 'bold',
                       color: '#FFD700', // 진한 노란색
                       textShadow: '0 0 10px #FFD700, 0 0 20px #FFA500', // 빛나는 느낌

@@ -8,6 +8,7 @@ import {
   Slider,
   Typography,
   DialogActions,
+  Button,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import '../styles/SetupPage.css';
@@ -20,6 +21,7 @@ import fox from '../assets/characters/fox.png';
 import horse from '../assets/characters/horse.png';
 import crocodile from '../assets/characters/crocodile.png';
 import pig from '../assets/characters/pig.png';
+import { settingsStore } from '../stores/settingsStore';
 
 const characterList = [
   { id: 'cat', image: cat, defaultName: '고양이' },
@@ -112,21 +114,6 @@ function SetupPage() {
       >
         🐾 빙글빙글 동물 레이스 🐾
       </span>
-      {/* <h1
-        style={{
-          fontFamily: 'inherit',
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.3rem',
-        }}
-      >
-        <span style={{ filter: 'drop-shadow(0 0 4px #7af087)' }}>🐾</span>
-        빙글빙글 동물 레이스
-        <span style={{ filter: 'drop-shadow(0 0 4px #7af087)' }}>🐾</span>
-      </h1> */}
       <IconButton
         style={{ position: 'absolute', color: 'white', top: 16, right: 16 }}
         onClick={() => setOpenSettings(true)}
@@ -138,6 +125,21 @@ function SetupPage() {
         <DialogTitle>스킬 설정</DialogTitle>
         <DialogContent>
           <SkillSettingsPanel />
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginTop: '1rem',
+            }}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => settingsStore.reset()}
+            >
+              초기화
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -171,7 +173,7 @@ function SetupPage() {
         />
       </div>
       <button className="start-button" onClick={handleStart}>
-        레이스 시작!
+        레이싱장으로 GO! 🏎️💨
       </button>
       <Dialog open={openSkillDialog} onClose={handleCloseSkillDialog}>
         <DialogTitle style={{ textAlign: 'center' }}>
