@@ -429,7 +429,7 @@ export default function RacePage() {
       localStorage.setItem('players', JSON.stringify(randomizedCharacters));
 
       // 5. 랜덤 바퀴수
-      const randomLaps = Math.floor(Math.random() * 9) + 2;
+      const randomLaps = Math.floor(Math.random() * 5) + 2;
       localStorage.setItem('laps', randomLaps.toString());
 
       resetRace();
