@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
@@ -73,6 +73,25 @@ export default function RacePage() {
   const [spinning, setSpinning] = useState(false);
 
   const foodRef = useRef<FoodItem[]>([]);
+  const trackWrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  /* 웹뷰 풀스크린: 트랙이 뷰포트에 꽉 차도록 스케일 계산 */
+  useEffect(() => {
+    const el = trackWrapperRef.current;
+    if (!el) return;
+    const updateScale = () => {
+      if (!el) return;
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      const s = Math.min(w / 1200, h / 700, 2) || 1;
+      setScale(s);
+    };
+    updateScale();
+    const ro = new ResizeObserver(updateScale);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const leader = getLeaderIndex();
@@ -440,9 +459,11 @@ export default function RacePage() {
 
   if (characters.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <h2>❗ 참가자 정보가 없습니다.</h2>
-        <p>처음 화면으로 돌아가 참가자를 입력해주세요.</p>
+      <div className="race-container" style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <h2>❗ 참가자 정보가 없습니다.</h2>
+          <p>처음 화면으로 돌아가 참가자를 입력해주세요.</p>
+        </div>
       </div>
     );
   }
@@ -450,16 +471,16 @@ export default function RacePage() {
   return (
     <div className="race-container">
       <div className="race-top-bar">
-        <Button
+        <IconButton
+          aria-label="세팅으로 이동"
           onClick={() => navigate('/')}
-          startIcon={<ArrowBackIcon />}
           sx={{
             color: 'white',
             border: '2px solid white',
-            borderRadius: '30px',
-            padding: '6px 16px',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            fontWeight: 'bold',
+            width: 42,
+            height: 42,
+            backgroundColor: 'rgba(0,0,0,0.35)',
+            backdropFilter: 'blur(4px)',
             '&:hover': {
               backgroundColor: 'rgba(255,255,255,0.3)',
               transform: 'scale(1.05)',
@@ -467,11 +488,15 @@ export default function RacePage() {
             },
           }}
         >
-          세팅으로
-        </Button>
+          <ArrowBackIcon sx={{ fontSize: 24 }} />
+        </IconButton>
       </div>
 
-      <div className="oval-track-wrapper">
+      <div className="oval-track-wrapper" ref={trackWrapperRef}>
+        <div
+          className="oval-track-scaled"
+          style={{ ['--scale' as string]: scale } as React.CSSProperties}
+        >
         <div
           className="controls"
           style={{
@@ -762,6 +787,7 @@ export default function RacePage() {
             );
           })}
         </div>
+        </div>
       </div>
 
       {showRanking && (
@@ -788,9 +814,9 @@ export default function RacePage() {
               display: 'inline-block',
               backgroundColor: '#e6d3b3',
               color: '#000',
-              marginTop: 20,
-              borderRadius: '30px',
-              padding: '14px 20px',
+              marginTop: 'clamp(10px, 2vw, 20px)',
+              borderRadius: '24px',
+              padding: 'clamp(8px, 1.8vw, 14px) clamp(10px, 2vw, 20px)',
               textDecoration: 'none',
               boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
               transition: 'transform 0.2s',
@@ -803,11 +829,15 @@ export default function RacePage() {
             }
             onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
-            <div style={{ fontSize: '1rem', fontWeight: 600 }}>
+            <div style={{ fontSize: 'clamp(0.72rem, 1.5vw, 1rem)', fontWeight: 600 }}>
               재밌게 즐기셨다면?
             </div>
             <div
-              style={{ fontSize: '1.2rem', fontWeight: 900, color: 'brown' }}
+              style={{
+                fontSize: 'clamp(0.85rem, 1.9vw, 1.2rem)',
+                fontWeight: 900,
+                color: 'brown',
+              }}
             >
               ☕ 커피 한 잔~
             </div>

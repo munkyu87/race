@@ -118,89 +118,85 @@ function SetupPage() {
 
   return (
     <div className="setup-container">
-      <span
-        style={{
-          fontSize: '2.4rem',
-          color: 'white',
-          textShadow: '0 0 5px #ffd700',
-        }}
-      >
-        🐾 빙글빙글 동물 레이스 🐾
-      </span>
-      <IconButton
-        style={{ position: 'absolute', color: 'white', top: 16, right: 16 }}
-        onClick={() => setOpenSettings(true)}
-      >
-        <SettingsIcon fontSize="large" />
-      </IconButton>
+      <div className="setup-content">
+        <span className="setup-title">🐾 빙글빙글 동물 레이스 🐾</span>
+        <IconButton
+          className="setup-settings-button"
+          onClick={() => setOpenSettings(true)}
+        >
+          <SettingsIcon fontSize="large" />
+        </IconButton>
 
-      <Dialog open={openSettings} onClose={() => setOpenSettings(false)}>
-        <DialogTitle>스킬 설정</DialogTitle>
-        <DialogContent>
-          <SkillSettingsPanel />
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: '1.5rem',
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={settingsStore.settings.allJoin}
-                  onChange={(e) =>
-                    settingsStore.updateSetting('allJoin', e.target.checked)
-                  }
-                />
-              }
-              label="모든 캐릭터 자동 참가"
-            />
-
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => settingsStore.reset()}
+        <Dialog open={openSettings} onClose={() => setOpenSettings(false)}>
+          <DialogTitle>스킬 설정</DialogTitle>
+          <DialogContent>
+            <SkillSettingsPanel />
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: '1.5rem',
+              }}
             >
-              초기화
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={settingsStore.settings.allJoin}
+                    onChange={(e) =>
+                      settingsStore.updateSetting('allJoin', e.target.checked)
+                    }
+                  />
+                }
+                label="모든 캐릭터 자동 참가"
+              />
 
-      <div className="character-grid">
-        {characterList.map((char, idx) => (
-          <div key={idx} className="character-card">
-            <div className="character-slot">
-              <img
-                src={char.image}
-                alt={char.defaultName}
-                onClick={() => handleOpenSkillDialog(char.id)}
-              />
-              <input
-                type="text"
-                placeholder={char.defaultName}
-                value={names[idx]}
-                onChange={(e) => handleNameChange(idx, e.target.value)}
-              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => settingsStore.reset()}
+              >
+                초기화
+              </Button>
             </div>
-          </div>
-        ))}
+          </DialogContent>
+        </Dialog>
+
+        <div className="character-grid">
+          {characterList.map((char, idx) => (
+            <div key={idx} className="character-card">
+              <div className="character-slot">
+                <img
+                  src={char.image}
+                  alt={char.defaultName}
+                  onClick={() => handleOpenSkillDialog(char.id)}
+                />
+                <input
+                  type="text"
+                  placeholder={char.defaultName}
+                  value={names[idx]}
+                  onChange={(e) => handleNameChange(idx, e.target.value)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="lap-setting">
+          바퀴 수:
+          <input
+            type="number"
+            value={lapCount}
+            min={1}
+            max={10}
+            onChange={(e) => setLapCount(Number(e.target.value))}
+          />
+        </div>
+        <button className="start-button" onClick={handleStart}>
+          레이싱장으로 GO! 🏎️💨
+        </button>
       </div>
-      <div className="lap-setting">
-        바퀴 수:
-        <input
-          type="number"
-          value={lapCount}
-          min={1}
-          max={10}
-          onChange={(e) => setLapCount(Number(e.target.value))}
-        />
-      </div>
-      <button className="start-button" onClick={handleStart}>
-        레이싱장으로 GO! 🏎️💨
-      </button>
+
       <Dialog open={openSkillDialog} onClose={handleCloseSkillDialog}>
         <DialogTitle style={{ textAlign: 'center' }}>
           {selectedCharacter?.defaultName}
